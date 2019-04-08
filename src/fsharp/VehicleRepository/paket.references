@@ -1,0 +1,8 @@
+FSharp.Core
+
+Newtonsoft.Json
+
+RabbitMQ.Client
+
+SQLProvider
+System.Data.SqlClient
