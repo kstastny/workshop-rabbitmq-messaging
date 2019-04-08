@@ -100,7 +100,6 @@ module RabbiMq =
         let vehiclesQueue = "vehicle-reposiory.events.queue" //TODO remove, part of CONSUMER!
         let routingKey = "vehicle-event"
 
-        //TODO error handling - if the creation fails, we have to close the channel
         let channel = createChannel conn
         channel.ExchangeDeclare (
                 vehiclesExchange,

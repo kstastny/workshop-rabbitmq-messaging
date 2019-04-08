@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VehicleRepository", "VehicleRepository\VehicleRepository.fsproj", "{145DB739-93C9-451E-98D9-A6C264E10402}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ExchangeConsumer", "ExchangeConsumer\ExchangeConsumer.fsproj", "{D9D11224-861E-4C43-A172-5EB05B01DF04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{145DB739-93C9-451E-98D9-A6C264E10402}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{145DB739-93C9-451E-98D9-A6C264E10402}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{145DB739-93C9-451E-98D9-A6C264E10402}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9D11224-861E-4C43-A172-5EB05B01DF04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9D11224-861E-4C43-A172-5EB05B01DF04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9D11224-861E-4C43-A172-5EB05B01DF04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9D11224-861E-4C43-A172-5EB05B01DF04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

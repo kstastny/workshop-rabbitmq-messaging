@@ -28,8 +28,6 @@ let generateVehicle () : Vehicle = {
             (regPlateLetters |> Array.random)
             (rnd.Next 10)
             (rnd.Next (1000,9999))
-    //RegistrationPlate = "asdfasdfasdfasdfasdfasdfasd"
-        
 }
 
     

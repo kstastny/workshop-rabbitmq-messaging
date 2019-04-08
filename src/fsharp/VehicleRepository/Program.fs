@@ -2,11 +2,6 @@
 
 open VehicleRepository
 open VehicleRepository.App
-open VehicleRepository.Messaging
-
-let readCommand () =
-    printf "> "
-    Console.ReadLine().Trim().ToLowerInvariant()
 
 [<EntryPoint>]
 let main _ =
@@ -21,23 +16,10 @@ let main _ =
            Username = "guest"
            Password = "guest"
        }
+       DbFailureRate = 0.5
+       MessagingFailureRate = 0.5
     }
     
-    //TODO App.create instead?
-
-    use rabbitConnection = RabbiMq.connect config.Messaging
-    use eventPublisher = RabbiMq.createPublisher rabbitConnection ()
-    
-    let mutable cmd = ""
-    
-    while cmd <> "exit" do
-        cmd <- readCommand ()
-        try
-            match cmd with
-            | "add" -> App.addRandomVehicle config eventPublisher () |> printfn "%A"
-            | _ -> ()
-        with
-        | ex -> printfn "Error: %A" ex
-    
+    App.run config
     
     0 
