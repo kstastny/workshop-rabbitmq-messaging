@@ -14,11 +14,11 @@ let main argv =
     
     //TODO read from settings
     let config = {
-           Host = "localhost"
+           Host = "stastnyk"
            Port = 5672
            VHost = "/"
-           Username = "guest"
-           Password = "guest"
+           Username = "workshop"
+           Password = "inasproboate"
        }
     
     App.run config endpoints

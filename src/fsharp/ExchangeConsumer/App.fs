@@ -7,8 +7,9 @@ open System.Text
 open ExchangeConsumer.Messaging
 
 
-let run config endpoints =
+let run (config: Configuration) endpoints =
     
+    printfn "Connecting to RabbitMQ server at %s:%i" config.Host config.Port
     use conn = RabbiMq.connect config
     use channel = RabbiMq.createChannel conn
     
@@ -16,9 +17,9 @@ let run config endpoints =
     RabbiMq.consume
         (fun x ->
             printfn "Received from exchange '%s', routing key '%s':%s %A"
-                Environment.NewLine
                 x.Exchange
                 x.RoutingKey
+                Environment.NewLine
                 (x.Body |> Encoding.UTF8.GetString)
         )
         channel
