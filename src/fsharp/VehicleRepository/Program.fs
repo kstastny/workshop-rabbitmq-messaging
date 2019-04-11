@@ -10,14 +10,14 @@ let main _ =
     let config = {
        ConnectionString = """Server=(LocalDB)\messaging;Initial Catalog=messaging_samples;Persist Security Info=False;Integrated security=False;User ID=messaging;Password=Vo60&8cV7erE;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;"""
        Messaging = {
-           Host = "localhost"
+           Host = "stastnyk"
            Port = 5672
            VHost = "/"
-           Username = "guest"
-           Password = "guest"
+           Username = "workshop"
+           Password = "inasproboate"
        }
-       DbFailureRate = 0.5
-       MessagingFailureRate = 0.5
+       DbFailureRate = 0.0
+       MessagingFailureRate = 0.0
     }
     
     App.run config

@@ -1,0 +1,7 @@
+Microsoft.Extensions.Logging
+Microsoft.Extensions.Logging.Console
+Microsoft.Extensions.DependencyInjection
+
+Newtonsoft.Json
+
+RabbitMQ.Client

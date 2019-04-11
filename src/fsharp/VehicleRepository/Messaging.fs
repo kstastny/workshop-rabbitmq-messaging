@@ -97,7 +97,7 @@ module RabbiMq =
 
         //TODO queue and exchange declarations should be moved elsewhere
         let vehiclesExchange = "vehicle-repository.events"
-        let vehiclesQueue = "vehicle-reposiory.events.queue" //TODO remove, part of CONSUMER!
+        let vehiclesQueue = "vehicle-repository.events.queue" //TODO remove, part of CONSUMER!
         let routingKey = "vehicle-event"
 
         let channel = createChannel conn
