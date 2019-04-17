@@ -29,9 +29,9 @@ TODO *Command*, *Query*, *Event* (all in CQRS sense) and related queue patterns 
 
 TODO prepare templates
  - DB has to be setup
- - TODO setup template solution, including serializer, DTOs, DB access - CSharp
+ - TODO setup template solution, including serializer, DTOs, DB access - CSharp - exercise1 - just gutted final solution
  - TODO setup template solution, including serializer, DTOs, DB access - FSharp
- - point of the exercise is to connect ot Rabbit and send a message to specified exchange when new ORC FIGHTER is trained. Including the "sender" header
+ - point of the exercise is to connect ot Rabbit and send a message to specified exchange when new ORC WARRIOR is born. Including the "sender" header
         proof: listener in presenters computer
 
 ***
@@ -42,6 +42,8 @@ TODO important stuff when publishing - create slides
     * info - one connection per app. multiple channels (separate for producer and consumer, currently I would say one per "logical unit")    
     * declare exchange, queue - could be on both sides, I would recommend creation on consumer side only. Producer does not need to care about exchange, queues and such. OTH maybe it depends - publish-subscribe producer or admin creates, query and command consumer or admin creates. 
     * `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
+            - show what happens if there's nowhere to route (basic return)
+            - show what happens if there's no exchange (channel disconnect! but async!)
  
  - definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
         toto vede k Outboxu
@@ -152,7 +154,7 @@ TODO prepare template in FSharp
 ### Message Consumption
 
 - definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
-        toto vede k Retry, Retry with Delay, DLX, deduplication
+        toto vede k Retry, Retry with Delay, DLX, deduplication        
 
 TODO talk - what to think about? considerations
     - TODO see Consumer in Rad

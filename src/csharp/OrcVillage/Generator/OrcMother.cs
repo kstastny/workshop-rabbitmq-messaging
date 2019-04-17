@@ -6,9 +6,11 @@ namespace OrcVillage.Generator
     public class OrcMother
     {
         //random google for Orc names came up with this https://en.uesp.net/wiki/Lore:Orc_Names
-        private static string[] names =
+        private static readonly string[] Names =
         {
-            "Moghakh", "Atulg", "Azuk", "Bagamul", "Bashag", "Bologra", "Borug", "Lorzub", "Lugrub", "Olumba", "Orakh"
+            "Moghakh", "Atulg", "Azuk", "Bagamul", "Bashag", "Bologra", "Borug",
+            "Dur", "Dular", "Duma", "Garothmuk", "Garzonk", "Ghoragdush", "Khagra",
+            "Lorzub", "Lugrub", "Olumba", "Orakh"
         };
 
         private readonly Random rnd = new Random();
@@ -24,7 +26,7 @@ namespace OrcVillage.Generator
             {
                 Id = Guid.NewGuid(),
                 Born = DateTime.Now,
-                Name = GetRandomItem(names),
+                Name = GetRandomItem(Names),
                 //All orcs are warriors
                 Profession = "Warrior"
             };

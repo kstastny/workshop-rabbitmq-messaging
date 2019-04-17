@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -65,7 +66,7 @@ namespace ExchangeConsumer.Messaging
             consumer.Registered += ConsumerOnRegistered;
             consumer.Unregistered += ConsumerOnUnregistered;
 
-                
+
             //TODO show what happens when autoAck is true and we try to ACK
             channel.BasicConsume(consumer, queueName, autoAck: false);
         }
@@ -90,11 +91,30 @@ namespace ExchangeConsumer.Messaging
             ProcessMessage(e);
         }
 
+        private string GetHeaderAsString(IDictionary<string, object> headers, string key)
+        {
+            if (headers == null)
+                return null;
+
+            headers.TryGetValue(key, out var header);
+
+            //when received, the header is just array of bytes
+            if (header is byte[] headerBytes)
+            {
+                return Encoding.UTF8.GetString(headerBytes);
+            }
+
+            //if it is something else, we try string but most likely this will be null
+            return header as string;
+        }
+
         private void ProcessMessage(BasicDeliverEventArgs ea)
         {
             try
             {
-                logger.LogDebug("Received from exchange '{0}', routing key '{1}': {2}{3}",
+                var sender = GetHeaderAsString(ea.BasicProperties.Headers, "x-sender");
+                logger.LogDebug("Received message from `{0}`, exchange '{1}', routing key '{2}': {4}{5}",
+                    sender ?? "<< UNKNOWN >>",
                     ea.Exchange, ea.RoutingKey, Environment.NewLine, Encoding.UTF8.GetString(ea.Body));
 
                 T message;

@@ -58,18 +58,19 @@ namespace OrcVillage
                 .AddSingleton<App>();
 
 
-            //services.AddDbContext<VillageDbContext>(c => { c.UseSqlServer(appConfiguration.ConnectionString); });
+            services.AddDbContext<VillageDbContext>(c => { c.UseSqlServer(appConfiguration.ConnectionString); });
 
             //setup RabbitMq
             services
                 .AddSingleton<IRoutingTable<EventBase>, EventRoutingTable>()
-                .AddSingleton<IMessagePublisher, MessagePublisher>();
+                //.AddSingleton<IMessagePublisher, MessagePublisher>()
+                .AddScoped<IMessagePublisher, Outbox>()
+                ;
 
             services.AddLogging(builder =>
             {
-                // builder.AddConfiguration(configuration);
                 builder.AddConsole(cnf => { cnf.IncludeScopes = true; });
-                builder.SetMinimumLevel(LogLevel.Debug);
+                builder.SetMinimumLevel(LogLevel.Warning);
             });
 
             var serviceProvider = services.BuildServiceProvider();

@@ -1,6 +1,7 @@
 using System;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OrcVillage.Database;
 using OrcVillage.Generator;
 using OrcVillage.Messaging;
@@ -22,24 +23,35 @@ namespace OrcVillage
     {
         private readonly ConnectionProvider connectionProvider;
         private readonly AppConfiguration appConfiguration;
-        private readonly IMessagePublisher messagePublisher;
+
+        private readonly IServiceScopeFactory scopeFactory;
+        //private readonly IMessagePublisher messagePublisher;
 
         private readonly OrcMother mother = new OrcMother();
+        private readonly Random rnd = new Random();
 
         private readonly DbContextOptionsBuilder<VillageDbContext> optionsBuilder;
 
         public App(
             ConnectionProvider connectionProvider,
             AppConfiguration appConfiguration,
+            IServiceScopeFactory scopeFactory,
             IMessagePublisher messagePublisher)
 
         {
             this.connectionProvider = connectionProvider;
             this.appConfiguration = appConfiguration;
-            this.messagePublisher = messagePublisher;
+            this.scopeFactory = scopeFactory;
+            //this.messagePublisher = messagePublisher;
 
             optionsBuilder = new DbContextOptionsBuilder<VillageDbContext>();
             optionsBuilder.UseSqlServer(appConfiguration.ConnectionString);
+        }
+
+        private void RandomFailure(string where, double failureRate)
+        {
+            if (rnd.NextDouble() < failureRate)
+                throw new Exception("Random failure at " + where);
         }
 
 
@@ -52,27 +64,36 @@ namespace OrcVillage
         private void AddWarrior()
         {
             var newborn = mother.GiveBirth();
+            Console.WriteLine("New warrior was born: " + newborn.Name);
 
             using (var tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                using (var ctx = new VillageDbContext(optionsBuilder.Options))
+                using (var scope = scopeFactory.CreateScope())
                 {
-                    //TODO random errors
-                    ctx.Add(newborn);
+                    var messagePublisher = scope.ServiceProvider.GetService<IMessagePublisher>();
 
-                    messagePublisher.PublishEvent(new OrcEvent
+                    //using (var ctx = new VillageDbContext(optionsBuilder.Options))
+                    using (var ctx = scope.ServiceProvider.GetService<VillageDbContext>())
                     {
-                        Type = MessagingConstants.EVENT_TYPE_ORCEVENT,
-                        OrcId = newborn.Id,
-                        Name = newborn.Name,
-                        Profession = newborn.Profession
-                    });
+                        ctx.Add(newborn);
 
-                    ctx.SaveChanges();
+                        RandomFailure("messaging", appConfiguration.MessagingFailureRate);
+
+                        messagePublisher.PublishEvent(new OrcEvent
+                        {
+                            Type = MessagingConstants.EVENT_TYPE_ORCEVENT,
+                            OrcId = newborn.Id,
+                            Name = newborn.Name,
+                            Profession = newborn.Profession
+                        });
+
+                        RandomFailure("database", appConfiguration.MessagingFailureRate);
+
+                        ctx.SaveChanges();
+                    }
                 }
 
                 tran.Complete();
-                Console.WriteLine("New warrior was born: " + newborn.Name);
             }
         }
 
@@ -112,10 +133,10 @@ namespace OrcVillage
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error:" + e.Message);
+                    Console.WriteLine("Error: " + e.Message);
                 }
             }
-            
+
             rabbitMqConnection.Dispose();
         }
     }
