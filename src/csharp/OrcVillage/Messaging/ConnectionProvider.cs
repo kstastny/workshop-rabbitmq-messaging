@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace ExchangeConsumer.Messaging
+namespace OrcVillage.Messaging
 {
     public sealed class ConnectionProvider : IDisposable
     {

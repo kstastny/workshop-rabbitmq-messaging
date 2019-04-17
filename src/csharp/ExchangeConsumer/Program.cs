@@ -21,16 +21,23 @@ namespace ExchangeConsumer
                     PrefetchCount = 300,
                     QueueBindings = new List<QueueBinding>
                     {
+//                        new QueueBinding
+//                        {
+//                            Exchange = "vehicle-repository.events",
+//                            RoutingKey = "vehicle-event"
+//                        },
                         new QueueBinding
                         {
-                            Exchange = "vehicle-repository.events",
-                            RoutingKey = "vehicle-event"
-                        }
+                            Exchange = "orcvillage.events",
+                            RoutingKey = "orcevent"
+                        },
                     }
                 });
 
             Console.WriteLine("Press ENTER to exit.");
             Console.ReadLine();
+
+            serviceProvider.GetService<ConnectionProvider>().Dispose();
         }
 
         private static Configuration GetConfiguration()
@@ -49,18 +56,16 @@ namespace ExchangeConsumer
 
         private static IServiceProvider SetupServices()
         {
-//setup our DI
             var services = new ServiceCollection()
-                .AddSingleton<Configuration>(GetConfiguration())
+                .AddSingleton(GetConfiguration())
                 .AddSingleton<ConnectionProvider>()
                 .AddSingleton(typeof(MessageConsumer<>))
                 .AddSingleton<IMessageHandler<VehicleEventDto>, VehicleEventHandler>()
                 .AddSingleton<ISerializer, JsonSerializer>();
 
 
-            services.AddLogging((builder) =>
+            services.AddLogging(builder =>
             {
-               // builder.AddConfiguration(configuration);
                 builder.AddConsole(cnf => { cnf.IncludeScopes = true; });
                 builder.SetMinimumLevel(LogLevel.Debug);
             });

@@ -37,3 +37,25 @@ GO
 
 
 ALTER TABLE [dbo].[Vehicles] ADD CONSTRAINT FD_Vehicles_Created DEFAULT GETUTCDATE() FOR Created
+
+
+/****** Object:  Table [dbo].[Orcs]    Script Date: 17.04.2019 13:19:52 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Orcs](
+	[Id] [uniqueidentifier] NOT NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[Profession] [nvarchar](50) NOT NULL,
+	[Born] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_Orcs] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Orcs] ADD CONSTRAINT FD_Orcs_Born DEFAULT GETUTCDATE() FOR Born

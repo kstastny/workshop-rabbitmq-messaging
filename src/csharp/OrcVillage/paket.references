@@ -1,0 +1,10 @@
+Microsoft.Extensions.Logging
+Microsoft.Extensions.Logging.Console
+Microsoft.Extensions.DependencyInjection
+
+Microsoft.EntityFrameworkCore
+Microsoft.EntityFrameworkCore.SqlServer
+
+Newtonsoft.Json
+
+RabbitMQ.Client

@@ -80,6 +80,8 @@ TODO important stuff when publishing - create slides
 
 ### ???
 
+ - zminit distribuovane  transakce, two phase commit
+
     * how to fix the problems when sending data (and when this can be needed)
         * Command, Query - not necessary, the error can be displayed immediately and probably should (imo)
         * Event - necessary when we absolutely have to inform the others (architectural decistion - might not be needed when just clearing caches that expire anyway)
@@ -94,6 +96,8 @@ TODO important stuff when publishing - create slides
 ###  Outbox     
 
 TODO prepare slides
+
+TODO publisher confirms - ASI POTŘEBA! jinak jde odeslat a pokud neexistuje exchange tak spadne. Ukázat
 
 show the problematic example first (vehicle repository, use case of adding new vehicle, where it can fail - all three options)
         > simulates the reliability of distributed transactions without requiring use of the Distributed Transaction Coordinator (DTC).

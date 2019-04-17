@@ -8,6 +8,9 @@ nuget Microsoft.Extensions.DependencyInjection
 
 nuget Newtonsoft.Json
 
+nuget Microsoft.EntityFrameworkCore
+nuget Microsoft.EntityFrameworkCore.SqlServer
+
 // Messaging
 nuget RabbitMQ.Client
 
