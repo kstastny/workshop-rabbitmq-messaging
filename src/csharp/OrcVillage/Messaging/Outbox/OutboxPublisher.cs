@@ -27,23 +27,6 @@ namespace OrcVillage.Messaging.Outbox
             var routingInfo = eventRoutingTable.GetRoutingInfo(evnt);
             var payload = serializer.Serialize(evnt);
 
-//                var requestProperties = channel.CreateBasicProperties();
-//                requestProperties.ContentType = serializer.ContentType;
-//
-//                requestProperties.Headers = new Dictionary<string, object>();
-//                requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;
-
-//                channel.BasicPublish(
-//                    routingInfo.Exchange,
-//                    routingInfo.RoutingKey,
-//                    body: payload,
-//                    basicProperties: requestProperties,
-//                    mandatory: true);
-
-//                var t = channel.CreateBasicPublishBatch();
-//                    //t.Add(...);
-//                    t.Publish();
-
             var outboxMessage = new OutboxMessage
             {
                 Id = Guid.NewGuid(),

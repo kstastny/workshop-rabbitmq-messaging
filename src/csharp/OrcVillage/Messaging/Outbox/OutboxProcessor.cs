@@ -89,27 +89,25 @@ namespace OrcVillage.Messaging.Outbox
 
             lock (sendLock)
             {
-                foreach (var msgGroup in messages.GroupBy(m => m.ContentType))
-                {
-                    var batch = channel.CreateBasicPublishBatch();
+                var batch = channel.CreateBasicPublishBatch();
 
+                foreach (var msg in messages)
+                {
                     var requestProperties = channel.CreateBasicProperties();
-                    requestProperties.ContentType = msgGroup.Key;
+                    requestProperties.ContentType = msg.ContentType;
+                    requestProperties.MessageId = msg.Id.ToString();
 
                     requestProperties.Headers = new Dictionary<string, object>();
                     requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;
 
-                    foreach (var msg in msgGroup)
-                    {
-                        //TODO each send/bulk send will be a TCS, similar to RPC client. if possible
-                        //TODO publish confirms - counting messages https://www.rabbitmq.com/confirms.html
-
-                        batch.Add(
-                            msg.Exchange, msg.RoutingKey, true, requestProperties, Encoding.UTF8.GetBytes(msg.Body));
-                    }
-
-                    batch.Publish();
+                    batch.Add(
+                        msg.Exchange, msg.RoutingKey, true, requestProperties, Encoding.UTF8.GetBytes(msg.Body));
                 }
+
+                batch.Publish();
+                //wait for confirmation from the server that the messages were received
+                if (!channel.WaitForConfirms(TimeSpan.FromSeconds(5)))
+                    throw new Exception("Not all messages were confirmed");
             }
         }
 
@@ -137,8 +135,23 @@ namespace OrcVillage.Messaging.Outbox
                 channel.CallbackException += ChannelOnCallbackException;
                 channel.ModelShutdown += ChannelOnShutdown;
 
+                // Publisher confirms - see https://www.rabbitmq.com/confirms.html#when-publishes-are-confirmed
+                channel.ConfirmSelect();
+                channel.BasicAcks += ChannelOnBasicAcks;
+                channel.BasicNacks += ChannelOnBasicNacks;
+
                 state = State.Connected;
             }
+        }
+
+        private void ChannelOnBasicNacks(object sender, BasicNackEventArgs e)
+        {
+            Console.WriteLine("Basic NACKS, delivery tag {0}, multiple = {1} ", e.DeliveryTag, e.Multiple);
+        }
+
+        private void ChannelOnBasicAcks(object sender, BasicAckEventArgs e)
+        {
+            Console.WriteLine("Basic ACKS, delivery tag {0}, multiple = {1} ", e.DeliveryTag, e.Multiple);
         }
 
         private void ChannelOnShutdown(object sender, ShutdownEventArgs e)
@@ -153,10 +166,13 @@ namespace OrcVillage.Messaging.Outbox
 
         private void ChannelOnBasicReturn(object sender, BasicReturnEventArgs e)
         {
-            Console.WriteLine("Received basic return. Routing key {0}, reply {1}:{2}",
+            //https://stackoverflow.com/questions/6386117/rabbitmq-use-of-immediate-and-mandatory-bits
+            // either unroutable mandatory message or immediate message that cannot be processed right away 
+            Console.WriteLine("Received basic return. Routing key {0}, reply {1}:{2}. MessageId {3}",
                 e.RoutingKey,
                 e.ReplyCode,
-                e.ReplyText);
+                e.ReplyText,
+                e.BasicProperties.MessageId);
         }
 
         #endregion

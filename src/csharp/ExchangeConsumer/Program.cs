@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExchangeConsumer.DTO;
+using ExchangeConsumer.Events;
 using ExchangeConsumer.Messaging;
 using ExchangeConsumer.Messaging.Impl;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,17 +15,12 @@ namespace ExchangeConsumer
             var serviceProvider = SetupServices();
             //TODO declare exchanges and shared queues. including one shared DLX
 
-            serviceProvider.GetService<MessageConsumer<VehicleEventDto>>().Start(
+            serviceProvider.GetService<MessageConsumer<OrcEvent>>().Start(
                 new MessageConsumerConfiguration
                 {
                     PrefetchCount = 300,
                     QueueBindings = new List<QueueBinding>
                     {
-//                        new QueueBinding
-//                        {
-//                            Exchange = "vehicle-repository.events",
-//                            RoutingKey = "vehicle-event"
-//                        },
                         new QueueBinding
                         {
                             Exchange = "orcvillage.events",
@@ -60,7 +55,7 @@ namespace ExchangeConsumer
                 .AddSingleton(GetConfiguration())
                 .AddSingleton<ConnectionProvider>()
                 .AddSingleton(typeof(MessageConsumer<>))
-                .AddSingleton<IMessageHandler<VehicleEventDto>, VehicleEventHandler>()
+                .AddSingleton<IMessageHandler<OrcEvent>, OrcEventHandler>()
                 .AddSingleton<ISerializer, JsonSerializer>();
 
 

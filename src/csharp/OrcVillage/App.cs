@@ -31,7 +31,7 @@ namespace OrcVillage
         private readonly OrcMother mother = new OrcMother();
         private readonly Random rnd = new Random();
 
-        private readonly DbContextOptionsBuilder<VillageDbContext> optionsBuilder;
+        //private readonly DbContextOptionsBuilder<VillageDbContext> optionsBuilder;
 
         public App(
             ConnectionProvider connectionProvider,
@@ -45,8 +45,8 @@ namespace OrcVillage
             this.scopeFactory = scopeFactory;
             this.outboxProcessor = outboxProcessor;
 
-            optionsBuilder = new DbContextOptionsBuilder<VillageDbContext>();
-            optionsBuilder.UseSqlServer(appConfiguration.ConnectionString);
+//            optionsBuilder = new DbContextOptionsBuilder<VillageDbContext>();
+//            optionsBuilder.UseSqlServer(appConfiguration.ConnectionString);
         }
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
@@ -104,8 +104,7 @@ namespace OrcVillage
             //TODO DLX support
             using (var channel = rabbitMqConnection.CreateModel())
             {
-                //NOTE: normally the exchange would be durable
-                channel.ExchangeDeclare(MessagingConstants.EXCHANGE_EVENTS, "direct", false, false);
+                channel.ExchangeDeclare(MessagingConstants.EXCHANGE_EVENTS, "direct", true, false);
 
                 //TODO remove - is just for test
 //                channel.QueueDeclare("test", false, false, false);

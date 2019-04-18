@@ -46,6 +46,7 @@ TODO important stuff when publishing - create slides
     * `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
             - show what happens if there's nowhere to route (basic return)
             - show what happens if there's no exchange (channel disconnect! but async!)
+    * basicProperties.Type - type of message, e.g. specific event. might help with deserialization or deciding how to handle the message
  
  - definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
         toto vede k Outboxu
@@ -55,6 +56,7 @@ TODO important stuff when publishing - create slides
 ### Failures in Publishing
 
  * TODO prepare slides and short talk
+ * TODO demo - send to nonexistent queue
 
      * tell something about it - what can go wrong
         * problems
@@ -101,7 +103,7 @@ TODO important stuff when publishing - create slides
 
 TODO prepare slides
 
-TODO publisher confirms - ASI POTŘEBA! jinak jde odeslat a pokud neexistuje exchange tak spadne. Ukázat
+DONE publisher confirms - ASI POTŘEBA! jinak jde odeslat a pokud neexistuje exchange tak spadne. Ukázat
 
 show the problematic example first (vehicle repository, use case of adding new vehicle, where it can fail - all three options)
         > simulates the reliability of distributed transactions without requiring use of the Distributed Transaction Coordinator (DTC).
@@ -128,13 +130,15 @@ show the problematic example first (vehicle repository, use case of adding new v
             * TODO maybe https://ronanmoriarty.com/tag/outbox-pattern/ (not working atm)        
     * Outbox in NServiceBus - https://docs.particular.net/nservicebus/outbox/ (Inbox?) - just mention
 
-TODO alternatives - transactions. skip?
+TODO demo - stop broker, see recovery
+
+
 
 ***
 
 > Exercise 2 - Outbox
 
-TODO implement example in Csharp
+DONE implement example in Csharp
 TODO implement example in FSharp
 TODO prepare template in CSharp
 TODO prepare template in FSharp
@@ -143,11 +147,13 @@ TODO prepare template in FSharp
 
 > Exercise 3 - Message Consumption
 
- - every tribe wants information about warriors in other tribes to see who is strongers
+ - every tribe wants information about warriors in other tribes to see who is stronger
  - store data to DB, received in specified exchange
  - TODO command and event consumption differences. Competing Consumers
  - plus: execute commands by the supreme chieftain (Saruman?) - Exercise 3a, 3b
 
+TODO implement example in CSharp - ONLY COMMAND HANDLER?
+TODO implement example in FSharp - only command handler?
 TODO prepare template in CSharp
 TODO prepare template in FSharp
 

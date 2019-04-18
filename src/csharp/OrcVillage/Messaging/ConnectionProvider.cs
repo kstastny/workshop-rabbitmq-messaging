@@ -34,6 +34,7 @@ namespace OrcVillage.Messaging
 
                 var conn = CreateConnection();
 
+                conn.RecoverySucceeded += Connection_RecoverySucceeded;
                 conn.CallbackException += Connection_CallbackException;
                 conn.ConnectionBlocked += Connection_ConnectionBlocked;
                 conn.ConnectionShutdown += Connection_ConnectionShutdown;
@@ -44,6 +45,8 @@ namespace OrcVillage.Messaging
 
             return connection;
         }
+
+
 
         private IConnection CreateConnection()
         {
@@ -65,13 +68,15 @@ namespace OrcVillage.Messaging
         private void Connection_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
             logger.LogInformation("Connection {0} shutdown: {1} ", GetConnectionInfo(sender), e.ReplyText);
-            if (sender is IConnection conn)
-            {
-                conn.CallbackException -= Connection_CallbackException;
-                conn.ConnectionBlocked -= Connection_ConnectionBlocked;
-                conn.ConnectionShutdown -= Connection_ConnectionShutdown;
-                conn.ConnectionUnblocked -= Connection_ConnectionUnblocked;
-            }
+            Console.WriteLine("Connection {0} shutdown: {1} ", GetConnectionInfo(sender), e.ReplyText);
+//            if (sender is IConnection conn)
+//            {
+//                conn.CallbackException -= Connection_CallbackException;
+//                conn.ConnectionBlocked -= Connection_ConnectionBlocked;
+//                conn.ConnectionShutdown -= Connection_ConnectionShutdown;
+//                conn.ConnectionUnblocked -= Connection_ConnectionUnblocked;
+//                conn.RecoverySucceeded -= Connection_RecoverySucceeded;
+//            }
         }
 
 
@@ -83,11 +88,18 @@ namespace OrcVillage.Messaging
         private void Connection_CallbackException(object sender, CallbackExceptionEventArgs e)
         {
             logger.LogInformation("Connection {0} CallbackException: ", GetConnectionInfo(sender), e);
+            
         }
 
         private void Connection_ConnectionUnblocked(object sender, EventArgs e)
         {
             logger.LogInformation("Connection {0} unblocked: {1} ", GetConnectionInfo(sender));
+        }
+        
+        private void Connection_RecoverySucceeded(object sender, EventArgs e)
+        {
+            logger.LogInformation("Connection {0} recovery succeeded: {1} ", GetConnectionInfo(sender));
+            Console.WriteLine("Connection recovery succeeded: {0} ", GetConnectionInfo(sender));
         }
 
         private string GetConnectionInfo(object sender)

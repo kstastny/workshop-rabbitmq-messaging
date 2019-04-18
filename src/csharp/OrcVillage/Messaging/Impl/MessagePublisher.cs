@@ -55,6 +55,7 @@ namespace OrcVillage.Messaging.Impl
 
                 var requestProperties = channel.CreateBasicProperties();
                 requestProperties.ContentType = serializer.ContentType;
+                requestProperties.Type = evnt.GetType().Name;
 
                 requestProperties.Headers = new Dictionary<string, object>();
                 requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;
