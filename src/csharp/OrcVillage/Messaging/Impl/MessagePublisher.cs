@@ -42,7 +42,7 @@ namespace OrcVillage.Messaging.Impl
         public void PublishEvent(EventBase evnt)
         {
             if (state == State.Disposed)
-                throw new InvalidOperationException("RPC client was already disposed, cannot make requests");
+                throw new InvalidOperationException("Already disposed, cannot make requests");
 
             if (state != State.Connected)
                 Connect();

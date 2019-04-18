@@ -2,6 +2,8 @@ source https://api.nuget.org/v3/index.json
 framework: netcoreapp2.2
 storage: none
 
+nuget System.Linq
+
 nuget Microsoft.Extensions.Logging
 nuget Microsoft.Extensions.Logging.Console
 nuget Microsoft.Extensions.DependencyInjection

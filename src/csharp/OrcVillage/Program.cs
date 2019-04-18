@@ -7,6 +7,7 @@ using OrcVillage.Messaging.Impl;
 using Microsoft.EntityFrameworkCore;
 using OrcVillage.Messaging;
 using OrcVillage.Messaging.Events;
+using OrcVillage.Messaging.Outbox;
 
 namespace OrcVillage
 {
@@ -39,8 +40,8 @@ namespace OrcVillage
             {
                 ConnectionString =
                     @"Server=(LocalDB)\messaging;Initial Catalog=messaging_samples;Persist Security Info=False;Integrated security=False;User ID=messaging;Password=Vo60&8cV7erE;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;",
-                DbFailureRate = 0.25,
-                MessagingFailureRate = 0.25
+                DbFailureRate = 0,
+                MessagingFailureRate = 0
             };
         }
 
@@ -64,7 +65,8 @@ namespace OrcVillage
             services
                 .AddSingleton<IRoutingTable<EventBase>, EventRoutingTable>()
                 //.AddSingleton<IMessagePublisher, MessagePublisher>()
-                .AddScoped<IMessagePublisher, Outbox>()
+                .AddScoped<IMessagePublisher, OutboxPublisher>()
+                .AddSingleton<OutboxProcessor>()
                 ;
 
             services.AddLogging(builder =>

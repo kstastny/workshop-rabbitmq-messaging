@@ -8,6 +8,8 @@
 
 # Advanced Messaging Patterns
 
+TODO setup instructions in readme.md
+
 ***
 
 ## Outline

@@ -6,6 +6,7 @@ using OrcVillage.Database;
 using OrcVillage.Generator;
 using OrcVillage.Messaging;
 using OrcVillage.Messaging.Events;
+using OrcVillage.Messaging.Outbox;
 using RabbitMQ.Client;
 
 namespace OrcVillage
@@ -25,7 +26,7 @@ namespace OrcVillage
         private readonly AppConfiguration appConfiguration;
 
         private readonly IServiceScopeFactory scopeFactory;
-        //private readonly IMessagePublisher messagePublisher;
+        private readonly OutboxProcessor outboxProcessor;
 
         private readonly OrcMother mother = new OrcMother();
         private readonly Random rnd = new Random();
@@ -36,18 +37,19 @@ namespace OrcVillage
             ConnectionProvider connectionProvider,
             AppConfiguration appConfiguration,
             IServiceScopeFactory scopeFactory,
-            IMessagePublisher messagePublisher)
+            OutboxProcessor outboxProcessor)
 
         {
             this.connectionProvider = connectionProvider;
             this.appConfiguration = appConfiguration;
             this.scopeFactory = scopeFactory;
-            //this.messagePublisher = messagePublisher;
+            this.outboxProcessor = outboxProcessor;
 
             optionsBuilder = new DbContextOptionsBuilder<VillageDbContext>();
             optionsBuilder.UseSqlServer(appConfiguration.ConnectionString);
         }
 
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private void RandomFailure(string where, double failureRate)
         {
             if (rnd.NextDouble() < failureRate)
@@ -113,6 +115,7 @@ namespace OrcVillage
 
         public void Run()
         {
+            outboxProcessor.Start();
             var rabbitMqConnection = connectionProvider.GetOrCreateConnection();
 
             DeclareExchangesAndQueues(rabbitMqConnection);
@@ -138,6 +141,7 @@ namespace OrcVillage
             }
 
             rabbitMqConnection.Dispose();
+            outboxProcessor.Dispose();
         }
     }
 }
