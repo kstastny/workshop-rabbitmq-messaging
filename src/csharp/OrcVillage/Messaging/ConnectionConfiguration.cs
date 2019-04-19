@@ -1,6 +1,6 @@
 namespace OrcVillage.Messaging
 {
-    public class Configuration
+    public class ConnectionConfiguration
     {
         public string Host { get; set; }
         public int Port { get; set; }

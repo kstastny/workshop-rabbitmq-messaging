@@ -8,7 +8,7 @@ namespace OrcVillage.Messaging
     public sealed class ConnectionProvider : IDisposable
     {
         private readonly ILogger<ConnectionProvider> logger;
-        private readonly Configuration configuration;
+        private readonly ConnectionConfiguration connectionConfiguration;
 
         private readonly object lockObj = new object();
 
@@ -16,10 +16,10 @@ namespace OrcVillage.Messaging
 
         public ConnectionProvider(
             ILogger<ConnectionProvider> logger,
-            Configuration configuration)
+            ConnectionConfiguration connectionConfiguration)
         {
             this.logger = logger;
-            this.configuration = configuration;
+            this.connectionConfiguration = connectionConfiguration;
         }
 
         public IConnection GetOrCreateConnection()
@@ -52,15 +52,15 @@ namespace OrcVillage.Messaging
         {
             var connectionFactory = new ConnectionFactory
             {
-                HostName = configuration.Host,
-                Port = configuration.Port,
-                UserName = configuration.Username,
-                Password = configuration.Password,
-                VirtualHost = configuration.VHost,
+                HostName = connectionConfiguration.Host,
+                Port = connectionConfiguration.Port,
+                UserName = connectionConfiguration.Username,
+                Password = connectionConfiguration.Password,
+                VirtualHost = connectionConfiguration.VHost,
                 AutomaticRecoveryEnabled = true
             };
 
-            var conn = connectionFactory.CreateConnection(configuration.ConnectionName);
+            var conn = connectionFactory.CreateConnection(connectionConfiguration.ConnectionName);
 
             return conn;
         }

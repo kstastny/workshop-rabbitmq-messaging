@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using OrcVillage.Messaging.Commands;
 using OrcVillage.Messaging.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -17,6 +18,7 @@ namespace OrcVillage.Messaging.Impl
         }
 
         private readonly IRoutingTable<EventBase> eventRoutingTable;
+        private readonly IRoutingTable<CommandBase> commandRoutingTable;
         private readonly ConnectionProvider connectionProvider;
         private readonly ISerializer serializer;
 
@@ -30,10 +32,12 @@ namespace OrcVillage.Messaging.Impl
 
         public MessagePublisher(
             IRoutingTable<EventBase> eventRoutingTable,
+            IRoutingTable<CommandBase> commandRoutingTable,
             ConnectionProvider connectionProvider,
             ISerializer serializer)
         {
             this.eventRoutingTable = eventRoutingTable;
+            this.commandRoutingTable = commandRoutingTable;
             this.connectionProvider = connectionProvider;
             this.serializer = serializer;
         }
@@ -52,10 +56,40 @@ namespace OrcVillage.Messaging.Impl
                 var routingInfo = eventRoutingTable.GetRoutingInfo(evnt);
                 var payload = serializer.Serialize(evnt);
 
-
                 var requestProperties = channel.CreateBasicProperties();
                 requestProperties.ContentType = serializer.ContentType;
                 requestProperties.Type = evnt.GetType().Name;
+
+                requestProperties.Headers = new Dictionary<string, object>();
+                requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;
+
+                channel.BasicPublish(
+                    routingInfo.Exchange,
+                    routingInfo.RoutingKey,
+                    body: payload,
+                    basicProperties: requestProperties,
+                    //does not need to be routed
+                    mandatory: false);
+            }
+        }
+
+        public void PublishCommand(CommandBase command)
+        {
+            //TODO refactor to helper method - receives routingInfo, props, if mandatory. maybe not worth it for the demo
+            if (state == State.Disposed)
+                throw new InvalidOperationException("Already disposed, cannot make requests");
+
+            if (state != State.Connected)
+                Connect();
+
+            lock (sendLock)
+            {
+                var routingInfo = commandRoutingTable.GetRoutingInfo(command);
+                var payload = serializer.Serialize(command);
+
+                var requestProperties = channel.CreateBasicProperties();
+                requestProperties.ContentType = serializer.ContentType;
+                requestProperties.Type = command.GetType().Name;
 
                 requestProperties.Headers = new Dictionary<string, object>();
                 requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;

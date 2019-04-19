@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using OrcVillage.Database;
+using OrcVillage.Messaging.Commands;
 using OrcVillage.Messaging.Events;
 
 namespace OrcVillage.Messaging.Outbox
@@ -40,6 +41,12 @@ namespace OrcVillage.Messaging.Outbox
             };
 
             dbContext.Add(outboxMessage);
+        }
+
+        public void PublishCommand(CommandBase command)
+        {
+            //TODO
+            throw new NotImplementedException();
         }
 
         public void Dispose()

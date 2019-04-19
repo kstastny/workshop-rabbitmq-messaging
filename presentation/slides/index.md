@@ -32,6 +32,9 @@ TODO *Command*, *Query*, *Event* (all in CQRS sense) and related queue patterns 
 TODO prepare templates
  - DB has to be setup
  - TODO setup template solution, including serializer, DTOs, DB access - CSharp - exercise1 - just gutted final solution
+        TODO not gutted final - take the version from Outbox with confirms (or older! and Outbox with confirms prepare for Ex 2!)
+        DIRECTORY exercises, same level as `presentation`
+        `src` when final - rename to `solutions` ?
  - TODO setup template solution, including serializer, DTOs, DB access - FSharp
  - point of the exercise is to connect ot Rabbit and send a message to specified exchange when new ORC WARRIOR is born. Including the "sender" header
         proof: listener in presenters computer
@@ -131,6 +134,7 @@ show the problematic example first (vehicle repository, use case of adding new v
     * Outbox in NServiceBus - https://docs.particular.net/nservicebus/outbox/ (Inbox?) - just mention
 
 TODO demo - stop broker, see recovery
+TODO show IRoutingTable - in command producer is necessary
 
 
 
@@ -145,6 +149,7 @@ TODO prepare template in FSharp
 
 *** 
 
+
 > Exercise 3 - Message Consumption
 
  - every tribe wants information about warriors in other tribes to see who is stronger
@@ -153,16 +158,20 @@ TODO prepare template in FSharp
  - plus: execute commands by the supreme chieftain (Saruman?) - Exercise 3a, 3b
 
 TODO implement example in CSharp - ONLY COMMAND HANDLER?
+        - command handler - chance of failure of quest and preparation 
 TODO implement example in FSharp - only command handler?
 TODO prepare template in CSharp
 TODO prepare template in FSharp
+
+
 
 ***
 
 ### Message Consumption
 
 - definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
-        toto vede k Retry, Retry with Delay, DLX, deduplication        
+        toto vede k Retry, Retry with Delay, DLX, deduplication 
+        TODO RETRY EXERCISE!!!       
 
 TODO talk - what to think about? considerations
     - TODO see Consumer in Rad
@@ -183,6 +192,12 @@ TODO talk - what to think about? considerations
             * info - how can the messages get out of order? example 
 
     * idempotent consumption
+
+    //TODO show what happens when autoAck is true and we try to ACK
+
+    TODO pořádek v použití LOGGER vs Console.WriteLine. SJEDNOTIT v příkladech 
+      - logger použít standardně, writeline jako info co by mělo být vždy?
+
 ***
 
 > Exercise 4 - Dead Letter Exchange

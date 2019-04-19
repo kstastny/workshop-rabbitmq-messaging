@@ -15,6 +15,7 @@ namespace ExchangeConsumer
             var serviceProvider = SetupServices();
             //TODO declare exchanges and shared queues. including one shared DLX
 
+            //TODO separate consumer for Commands! and for DLX!
             serviceProvider.GetService<MessageConsumer<OrcEvent>>().Start(
                 new MessageConsumerConfiguration
                 {
@@ -25,6 +26,21 @@ namespace ExchangeConsumer
                         {
                             Exchange = "orcvillage.events",
                             RoutingKey = "orcevent"
+                        },
+//                        new QueueBinding
+//                        {
+//                            Exchange = "orcvillage.commands",
+//                            RoutingKey = "quest"
+//                        },
+                        new QueueBinding
+                        {
+                            Exchange = "orcvillage.commands",
+                            RoutingKey = "preparationtask"
+                        },                        
+                        new QueueBinding
+                        {
+                            Exchange = "orcvillage.dlx",
+                            RoutingKey = ""
                         },
                     }
                 });

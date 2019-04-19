@@ -73,7 +73,7 @@ namespace ExchangeConsumer.Messaging
 
         private void ConsumerOnUnregistered(object sender, ConsumerEventArgs e)
         {
-            logger.LogInformation("Consumer {0} registered", e.ConsumerTag);
+            logger.LogInformation("Consumer {0} unregistered", e.ConsumerTag);
         }
 
         private void ConsumerOnRegistered(object sender, ConsumerEventArgs e)
