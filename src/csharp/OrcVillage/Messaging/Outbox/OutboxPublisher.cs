@@ -66,6 +66,26 @@ namespace OrcVillage.Messaging.Outbox
             dbContext.Add(outboxMessage);
         }
 
+        public void PublishPoisonMessage(CommandBase command)
+        {
+            var routingInfo = commandRoutingTable.GetRoutingInfo(command);
+            var payload = Encoding.UTF8.GetBytes("This is poison }");
+
+            var outboxMessage = new OutboxMessage
+            {
+                Id = Guid.NewGuid(),
+                //NOTE: this is a simplification for demo purposes, normally the Body in DB would have to be saved as byte array to support binary message formats 
+                Body = Encoding.UTF8.GetString(payload),
+                Exchange = routingInfo.Exchange,
+                RoutingKey = routingInfo.RoutingKey,
+                ContentType = serializer.ContentType,
+                SentDateTime = null,
+                PublishDateTime = DateTime.Now
+            };
+
+            dbContext.Add(outboxMessage);
+        }
+
         public void Dispose()
         {
         }

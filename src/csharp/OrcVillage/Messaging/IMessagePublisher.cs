@@ -9,5 +9,7 @@ namespace OrcVillage.Messaging
         void PublishEvent(EventBase evnt);
         
         void PublishCommand(CommandBase command);
+        
+        void PublishPoisonMessage(CommandBase command);
     }
 }

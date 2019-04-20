@@ -128,6 +128,23 @@ namespace OrcVillage
             }
         }
 
+        private void SendPoisonMessage()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                using (var ctx = scope.ServiceProvider.GetService<VillageDbContext>())
+                {
+                    var messagePublisher = scope.ServiceProvider.GetService<IMessagePublisher>();
+                    
+                    //TODO DLX for preparation queue. or better example
+                    messagePublisher.PublishPoisonMessage(chieftain.Preparation());
+                    messagePublisher.PublishPoisonMessage(chieftain.Quest());
+
+                    ctx.SaveChanges();
+                }
+            }
+        }
+
         private void RequestQuest()
         {
             SendCommand(chieftain.Quest());
@@ -193,6 +210,9 @@ namespace OrcVillage
                         case "prep":
                             RequestPreparation();
                             break;
+                        case "poison":
+                            SendPoisonMessage();
+                            break;
                     }
                 }
                 catch (Exception e)
@@ -206,6 +226,7 @@ namespace OrcVillage
             rabbitMqConnection.Dispose();
             outboxProcessor.Dispose();
         }
+
 
         private void StartConsumers()
         {

@@ -29,6 +29,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
     * lock when sending - channel is not thread safe
     * set content type
     * set message type
+* Command - mandatory; event - not mandatory
 
 
 ### Failures in Publishing

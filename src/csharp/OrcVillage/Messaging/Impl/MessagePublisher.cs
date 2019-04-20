@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using OrcVillage.Messaging.Commands;
 using OrcVillage.Messaging.Events;
@@ -85,6 +86,37 @@ namespace OrcVillage.Messaging.Impl
             {
                 var routingInfo = commandRoutingTable.GetRoutingInfo(command);
                 var payload = serializer.Serialize(command);
+
+                var requestProperties = channel.CreateBasicProperties();
+                requestProperties.ContentType = serializer.ContentType;
+                requestProperties.Type = command.GetType().Name;
+                requestProperties.Persistent = true; //just helper for setting .DeliveryMode
+
+
+                requestProperties.Headers = new Dictionary<string, object>();
+                requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;
+
+                channel.BasicPublish(
+                    routingInfo.Exchange,
+                    routingInfo.RoutingKey,
+                    body: payload,
+                    basicProperties: requestProperties,
+                    mandatory: true);
+            }
+        }
+
+        public void PublishPoisonMessage(CommandBase command)
+        {
+            if (state == State.Disposed)
+                throw new InvalidOperationException("Already disposed, cannot make requests");
+
+            if (state != State.Connected)
+                Connect();
+
+            lock (sendLock)
+            {
+                var routingInfo = commandRoutingTable.GetRoutingInfo(command);
+                var payload = Encoding.UTF8.GetBytes("This is poison }");
 
                 var requestProperties = channel.CreateBasicProperties();
                 requestProperties.ContentType = serializer.ContentType;
