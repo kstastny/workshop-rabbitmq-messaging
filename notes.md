@@ -20,6 +20,15 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 * I want to use this workshop as an opportunity to exchange experience and knowledge, discuss problems and find possible solutions
 * the examples are just that, examples. Often duplicate code is kept for sake of clarity and easy reference
 
+### Exercise 1 - Message Publishing
+
+* Console.WriteLine is meant as CLI, logger is just logger
+* Solution
+    * notice one connection
+    * lock when sending - channel is not thread safe
+    * set content type
+    * set message type
+
 ### Failures in Publishing
 
 * Acknowledgements and Confirms

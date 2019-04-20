@@ -39,17 +39,13 @@ TODO setup instructions in readme.md
 
 > Exercise 1 - Message Publishing
 
-TODO prepare templates
-TODO demo - set MESSAGE TYPE!!! deserialize by that, push into serializer ?
-TODO write down steps in the slide, roughly where to fill what
- - DB has to be setup
- - TODO setup template solution, including serializer, DTOs, DB access - CSharp - exercise1 - just gutted final solution
-        TODO not gutted final - take the version from Outbox with confirms (or older! and Outbox with confirms prepare for Ex 2!)
-        DIRECTORY exercises, same level as `presentation`
-        `src` when final - rename to `solutions` ?
- - TODO setup template solution, including serializer, DTOs, DB access - FSharp
- - point of the exercise is to connect ot Rabbit and send a message to specified exchange when new ORC WARRIOR is born. Including the "sender" header
-        proof: listener in presenters computer
+* create database tables using script `000CreateTables`
+* setup connection string in `appsettings.json`
+* complete TODOs in the solution `exercise-1`
+
+' the point is to send a message to everyone when new orc warrior is born 
+' proof: listener in presenters computer
+       
 
 ***
 
@@ -166,9 +162,7 @@ TODO prepare the demo
 > Exercise 2 - Outbox
 
 DONE implement example in Csharp
-TODO implement example in FSharp
 TODO prepare template in CSharp
-TODO prepare template in FSharp
 
 TODO demo - stop broker, see recovery
 
@@ -203,9 +197,6 @@ TODO prepare template in FSharp
 
 //TODO show what happens when autoAck is true and we try to ACK
 
-TODO pořádek v použití LOGGER vs Console.WriteLine. SJEDNOTIT v příkladech 
-    - logger použít standardně a při prezentaci nastavit na warning, writeline jako info co by mělo být vždy?
-
 ***
 
 ### Failures in consumption
@@ -220,7 +211,7 @@ TODO pořádek v použití LOGGER vs Console.WriteLine. SJEDNOTIT v příkladech
 
 > Exercise 4 - Retry
 
-TODO prepare exercise
+TODO prepare exercise (retry - sends to queue with no listeners, after TTL Rabbit sends to DLX which is the queue that has listeners and will process. draw an image)
 TODO talk about retry with delay, deduplication
 
 ***
