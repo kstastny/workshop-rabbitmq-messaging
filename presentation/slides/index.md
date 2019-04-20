@@ -11,25 +11,37 @@
 TODO setup instructions in readme.md
 
 ***
+## Patterns Overview
 
-## Outline
+![](images/EIP_patterns_overview.png)
 
-TODO
 
-- plus info that the workshop will be a little bit different than planned, more deeply going into the basics, not much into patterns 
-    
+<p class="reference">Source: <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/">https://www.enterpriseintegrationpatterns.com/patterns/messaging/</a></p>
 
-***
-
-### Review of Basics
-
-TODO *Command*, *Query*, *Event* (all in CQRS sense) and related queue patterns (images)
+' cover pattern areas, this talk will focus on Messaging Endpoints and partially Systems Management
 
 ***
 
-> Exercise 1 - Warmup - Message Publishing
+## RabbitMQ Messaging
+
+* use one connection per application
+* use one channel per thread
+* use separate channel for publishing and consuming
+* limit queue size
+* queues should be mostly empty
+
+
+' connections and channels long lived
+' per thread - I'd say per worker since a lot of stuff might be async
+' tips https://www.cloudamqp.com/blog/2018-01-19-part4-rabbitmq-13-common-errors.html and https://www.cloudamqp.com/blog/2017-12-29-part1-rabbitmq-best-practice.html
+
+***
+
+> Exercise 1 - Message Publishing
 
 TODO prepare templates
+TODO demo - set MESSAGE TYPE!!! deserialize by that, push into serializer ?
+TODO write down steps in the slide, roughly where to fill what
  - DB has to be setup
  - TODO setup template solution, including serializer, DTOs, DB access - CSharp - exercise1 - just gutted final solution
         TODO not gutted final - take the version from Outbox with confirms (or older! and Outbox with confirms prepare for Ex 2!)
@@ -43,100 +55,111 @@ TODO prepare templates
 
 ### Publishing Messages
 
-TODO important stuff when publishing - create slides
-    * info - one connection per app. multiple channels (separate for producer and consumer, currently I would say one per "logical unit")    
-    * declare exchange, queue - could be on both sides, I would recommend creation on consumer side only. Producer does not need to care about exchange, queues and such. OTH maybe it depends - publish-subscribe producer or admin creates, query and command consumer or admin creates. 
-    * `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
-            - show what happens if there's nowhere to route (basic return)
-            - show what happens if there's no exchange (channel disconnect! but async!)
-    * basicProperties.Type - type of message, e.g. specific event. might help with deserialization or deciding how to handle the message
- 
- - definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
-        toto vede k Outboxu
+* routing information - exchange, routing key
+* Always set ContentType
+* message Type
+* `mandatory` messages
+* `persistent` messages
+* identify client connection, identify sender
+
+' properties - message type, Id, TTL, custom headers
+' The type property on messages is an arbitrary string that helps applications communicate what kind of message that is (e.g. allow proper deserialization and handling)
+
+***
+
+### Declaring Exchanges and Queues
+
+* at the publisher side
+* at the consumer side
+* separately
+
+' my opinion - declaring on both makes sure that both sides' expectations are correct
+' but - needs to correctly sync and some decisions are not meant to be done by that side
+' earlier I used to do on both sides. Now I'd say either define queues completely elsewhere, or for commands and RPC - consumer only. For events - publisher only
+' very much depends on the design of the queues
 
 ***
 
 ### Failures in Publishing
 
- * TODO prepare slides and short talk
- * TODO demo - send to nonexistent queue
+* network failure, firewall problems
+* broker failure
+* logic errors in client application cause connection or channel closing
 
-     * tell something about it - what can go wrong
-        * problems
-            * network fail, firewall interrupts idle connection
-            * broker failure
-            * client application failure
-            * logic errors in client application cause connection or channel closing
-        * Connection Failure
-            * `IConnection.ConnectionShutdown`, `IModel.ModelShutdown` for reconnect
-            * Producer should resend the message (possibility of duplication)
-        * Acknowledgements and Confirms
-            * Ack - allows the client to confirm to the server that he processed the message (received and acted upon)
-            * Confirm - server confirms to client that he processed the message            
-            * guarantees *at-least-once* delivery
-            * https://www.rabbitmq.com/confirms.html#when
-        * heartbeat - detects dead TCP connections, see https://www.rabbitmq.com/heartbeats.html
-        * durable messages - to survive broker restart (queue and message have to be durable)            
-        * mandatory flag - to ensure that message has been routed
-        * consumer handling - if the message is sent again, RabbitMQ sets the `redelivered` flag. 
-            * The consumer may have seen the message before (or not - it might have been lost in transit on the first try)
-            * if `redelivered` is false, then it's not a duplicate (for sure? what if it's duplicate on send?)
-        * https://www.rabbitmq.com/reliability.html
-        * every new feature, communication channel - what happens if the message gets lost? What if it gets delivered late? what if it is delivered more than once?
-                * and design accordingly 
+
+' firewall - interrupts idle connection even after it is ok
+' conn or channel closing - we should implement reconnect ourselves (Rabbit client only does it for network problems, not closed channel). out of scope
 
 ***
 
-### ???
+### Failures in Publishing
 
- - zminit distribuovane  transakce, two phase commit
+* if unsure, producer should publish the message again
+* set messages and queues as durable
+* use publisher confirms
 
-    * how to fix the problems when sending data (and when this can be needed)
-        * Command, Query - not necessary, the error can be displayed immediately and probably should (imo)
-        * Event - necessary when we absolutely have to inform the others (architectural decistion - might not be needed when just clearing caches that expire anyway)
-            * especially for Integration Events
-                * Integration Event - informs about something that happened in a bounded context that may be of interest to other bounded contexts 
-                    * other words: event that is used to synchronize information about domain state between different microservices (if one service = one bounded context)
-                * see https://medium.com/@arleypadua/domain-events-vs-integration-events-5eb29a34fdbc
-                * and https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/integration-event-based-microservice-communications#integration-events
+' republish - with the same MessageId! leads to duplicates
 
-***                 
+***
 
-###  Outbox     
+### Failures in Publishing
 
-TODO prepare slides
+* how to handle unavailable broker and keep the business operation working?
+* how to handle failed business transaction and publish messages atomically?
 
-DONE publisher confirms - ASI POTŘEBA! jinak jde odeslat a pokud neexistuje exchange tak spadne. Ukázat
+***
 
-show the problematic example first (vehicle repository, use case of adding new vehicle, where it can fail - all three options)
-        > simulates the reliability of distributed transactions without requiring use of the Distributed Transaction Coordinator (DTC).
-            https://docs.particular.net/nservicebus/outbox/
-                seems a bit different to me?
-        * explain the problem (example that can fail)            
-        * avoids the "Lost Send"
-        * can minimize "Premature Send" (for both see http://gistlabs.com/2014/05/the-outbox/)
-        * atomicity of business operation (operations *all* occur or *nothing* occurs)
-        * possible with whatever queueing technology
-        * alternatives
-            * transactional queue (MSMQ) - not recommended today, legacy (two phase commit?)
-                * see https://en.wikipedia.org/wiki/Two-phase_commit_protocol (problems: blocking)
-            * transaction log mining - https://microservices.io/patterns/data/transaction-log-tailing.html
-            * full event sourcing
-            * see https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/architect-microservice-container-applications/asynchronous-message-based-communication
-        * Outbox sources
-            * http://www.kamilgrzybek.com/design/the-outbox-pattern/ nice description
-            * http://gistlabs.com/2014/05/the-outbox/ small note
-            * https://microservices.io/patterns/data/application-events.html high level desc, not much
-            * https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/architect-microservice-container-applications/asynchronous-message-based-communication
-                * alternatives
-            * https://jimmybogard.com/refactoring-towards-resilience-evaluating-coupling/        
-            * TODO maybe https://ronanmoriarty.com/tag/outbox-pattern/ (not working atm)        
-    * Outbox in NServiceBus - https://docs.particular.net/nservicebus/outbox/ (Inbox?) - just mention
+TODO prepare the demo
 
-TODO demo - stop broker, see recovery
-TODO show IRoutingTable - in command producer is necessary
+> Demo - Publishing Trouble
+
+' `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
+        - show what happens if there's nowhere to route (basic return)
+        - show what happens if there's no exchange (channel disconnect! but async!)
+
+' "Lost Send" - message not sent even when transaction is commited
+' "Premature Send" - sending message before transaction is commited
+' broker stops transaction - if unavailable, this is a reason for rollback 
+
+***
+
+### Solutions
+
+* Distributed transactions, two phase commit
+* Outbox
+
+' distributed transactions - slow, possible. see https://stackoverflow.com/questions/11739265/txselect-and-transactionscope
+' outbox simulates the reliability of distributed transactions without requiring use of the Distributed Transaction Coordinator
+'  atomicity of business operation (operations *all* occur or *nothing* occurs)
+
+***
+
+### Outbox
+
+![](images/EIP_GuaranteedMessagingSolution.gif)
 
 
+<p class="reference">Source: <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/GuaranteedMessaging.html">https://www.enterpriseintegrationpatterns.com/patterns/messaging/GuaranteedMessaging.html</a></p>
+
+' http://gistlabs.com/2014/05/the-outbox/
+' implied by this https://www.enterpriseintegrationpatterns.com/patterns/messaging/GuaranteedMessaging.html - leads to the fact, that it is the same as "Inbox" 
+' business data and outbox must exist in the same database! https://docs.particular.net/nservicebus/outbox/
+
+***
+
+### Outbox Usage
+
+* Commands
+* Integration Events
+
+' query/RPC imo not necessary, we need answer relatively soon
+'  Integration Event - used to synchronize information about domain state between different microservices (if one service = one bounded context)
+
+***
+
+### Inbox
+
+' see https://docs.particular.net/nservicebus/outbox/ - when receiving messages. deduplication - duplicates are dropped
 
 ***
 
@@ -147,64 +170,85 @@ TODO implement example in FSharp
 TODO prepare template in CSharp
 TODO prepare template in FSharp
 
+TODO demo - stop broker, see recovery
+
+
 *** 
 
 
 > Exercise 3 - Message Consumption
 
- - every tribe wants information about warriors in other tribes to see who is stronger
- - store data to DB, received in specified exchange
- - TODO command and event consumption differences. Competing Consumers
- - plus: execute commands by the supreme chieftain (Saruman?) - Exercise 3a, 3b
+' every tribe receives commands from the supremene chieftain and acts on them
+' preparation - every tribe does it
+' quest - only one tribe tries to fulfill it
 
-TODO implement example in CSharp - ONLY COMMAND HANDLER?
+DONE implement example in CSharp
         - command handler - chance of failure of quest and preparation 
-TODO implement example in FSharp - only command handler?
+TODO implement example in FSharp - only command handler
 TODO prepare template in CSharp
 TODO prepare template in FSharp
-
-
 
 ***
 
 ### Message Consumption
 
-- definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
-        toto vede k Retry, Retry with Delay, DLX, deduplication 
-        TODO RETRY EXERCISE!!!       
+* exclusive vs shared queue
+* manual vs automatic ACK
+* prefetch values
 
-TODO talk - what to think about? considerations
-    - TODO see Consumer in Rad
-    - TODO manual vs automatic ack
-    - TODO consuming events (own queue) vs commands
-    * acknowledge - https://www.rabbitmq.com/confirms.html - ACK needs to be on the same channel where the message was received, because of the delivery tag
-            * ack, nack (non standard, allows multiple reject), reject. multiple - all tags up to specified number
-    * consumer - QOS, prefetch count https://www.rabbitmq.com/consumer-prefetch.html (only with manual acknowledgement)        
-        * Values in the 100 through 300 range usually offer optimal throughput and do not run significant risk of overwhelming consumers. 
+' shared queue - commands, RPC. exclusive - events. differs in bindings
+' manual vs automatic, when to use what 
+' automatic - client receives everything, might be overloaded if there are many messages, messages may be lost
+' see https://www.rabbitmq.com/consumers.html and https://www.rabbitmq.com/confirms.html
 
-* Consumer side. how to differentiate?
-    * Retry
-        * options. retry with delay - short discussion, or just info, do not go that far
-        * https://www.rabbitmq.com/confirms.html watch out for requeue/redelivery loop. consumers should track number of redeliveries
-    * poison message, DLX - show how it works. exercise how? policy settings? DLX setting at queue?
-        * TODO https://www.rabbitmq.com/dlx.html consumer that will write all the reasons, problems etc.
-    * maybe - resequencer (delete before add) - need to create some data destroyer
-            * info - how can the messages get out of order? example 
+//TODO show what happens when autoAck is true and we try to ACK
 
-    * idempotent consumption
-
-    //TODO show what happens when autoAck is true and we try to ACK
-
-    TODO pořádek v použití LOGGER vs Console.WriteLine. SJEDNOTIT v příkladech 
-      - logger použít standardně, writeline jako info co by mělo být vždy?
+TODO pořádek v použití LOGGER vs Console.WriteLine. SJEDNOTIT v příkladech 
+    - logger použít standardně a při prezentaci nastavit na warning, writeline jako info co by mělo být vždy?
 
 ***
 
-> Exercise 4 - Dead Letter Exchange
+### Failures in consumption
+
+* `receive` |> `deserialize` |> `toDomain` |> `handle` |> `confirm`
+
+* Poison message
+* Consumer failure
+
+
+***
+
+> Exercise 4 - Retry
+
+TODO prepare exercise
+TODO talk about retry with delay, deduplication
+
+***
+### Dead-Letter Queue
+
+![](images/EIP_DeadLetterChannelSolution.gif)
+
+<p class="reference">Source: <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/DeadLetterChannel.html">https://www.enterpriseintegrationpatterns.com/patterns/messaging/DeadLetterChannel.html</a></p>
+
+***
+
+### Handling Dead-Lettered Messages
+
+* Monitor and Decide
+    * Abandon
+    * Retry manually 
+    * Fix Consumer and retry
+
+' suggestion: at first, monitor the dead letter exchange and decide based on what kind of messages end up there    
+' in practice poison and dead messages may end up in the same queue, you decide :)    
+
+***
+
+> Exercise 5 - Dead Letter Exchange
 
 - will be sent by presenter
 
-TODO prepare examples CSharp
+TODO prepare examples CSharp - DeadLetterLog - handle message from DLX and store in DB. inspect headers
 TODO prepare examples FSharp
 TODO prepare templates CSharp
 TODO prepare templates FSharp
@@ -212,18 +256,54 @@ TODO prepare templates FSharp
 ***
 
 
-### Monitoring
+## Monitoring
 
-* e.g. what the heck is happening in the system?
-        * NOTE: we don't care about monitoring the messaging system itself 
-* TODO prepare slides
-    who is connected
-    who is sending what messages + history
-    who is processing what messages + history
+* e.g. what is happening in the system?
+    * who is connected
+    * who is sending what messages + history
+    * who is processing what messages + history
 
-    TODO pattern examples - WireTap? Message History? Smart Proxy? TODO TODO TODO!!! 
-      MOŽNÁ - PÁR NAZNAČIT A UKÁZAT s tím že je proberem a zkusíme implementovat? uvidíme dle času
-     workshop - patterny vždy stejným stylem, jako u messaging talku - definovat problém, motivaci k řešení. Ukázku řešení, výhody, nevýhody. Příklad - implementace
-kde půjde, ukázat i implementovaný neřešený problém (např. nestabilitu, chybný výpočet a tak) a pak vyřešit
+<p class="reference">NOTE: we don't care about monitoring the messaging system itself, rather the message flow</p>
 
-    ZKUSIT WIRE TAP + info, že tyhle patterny jsou důvod proč by exchange and durable queues měly být deklarovány mimo consumery, v nějaké další službě. teoreticky občas někdy asi :D
+' I want to show patterns that interested me and where we could use them.
+
+***
+
+### WireTap
+
+![](images/EIP_WireTap.gif)
+
+
+<p class="reference">Source: <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/WireTap.html">https://www.enterpriseintegrationpatterns.com/patterns/messaging/WireTap.html</a></p>
+
+
+***
+
+### Smart Proxy
+
+![](images/EIP_SmartProxy.gif)
+
+
+<p class="reference">Source: <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/SmartProxy.html">https://www.enterpriseintegrationpatterns.com/patterns/messaging/SmartProxy.html</a></p>
+
+
+***
+
+### Message History
+
+![](images/EIP_MessageHistory.gif)
+
+
+<p class="reference">Source: <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageHistory.html">https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageHistory.html</a></p>
+
+
+
+***
+
+> Exercise 6 - ???
+
+' peoples choice, depending on time
+
+*** 
+
+## Discussion
