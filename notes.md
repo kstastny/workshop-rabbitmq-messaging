@@ -16,6 +16,9 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
  * for each exercise
     * after done - show solution and discuss various aspects
 
+* talk, demos, exercises are basics for discussion, do not be afraid to ask or point out errors. 
+* I want to use this workshop as an opportunity to exchange experience and knowledge, discuss problems and find possible solutions
+* the examples are just that, examples. Often duplicate code is kept for sake of clarity and easy reference
 
 ### Failures in Publishing
 

@@ -22,12 +22,14 @@ namespace OrcVillage.Messaging.Impl
                 case PreparationTask t:
                     if (rnd.NextDouble() < appConfiguration.PreparationFailureRate)
                         throw new TransientFailure($"[{t.TaskId}] {t.TaskGoal} - failed!");
-                    //TODO send information about success
+                    Console.WriteLine($"[{t.TaskId}] {t.TaskGoal} - success!");
+                    //TODO exercise: send information about success
                     break;
                 case Quest q:
                     if (rnd.NextDouble() < appConfiguration.QuestFailureRate)
                         throw new TransientFailure($"[{q.QuestId}] {q.QuestGoal} - failed!");
-                    //TODO send information about success
+                    Console.WriteLine($"[{q.QuestId}] {q.QuestGoal} - success!");
+                    //TODO exercise: send information about success
                     break;
                 default:
                     throw new Exception("Unknown command: " + message);

@@ -75,7 +75,6 @@ namespace OrcVillage.Messaging.Impl
 
         public void PublishCommand(CommandBase command)
         {
-            //TODO refactor to helper method - receives routingInfo, props, if mandatory. maybe not worth it for the demo
             if (state == State.Disposed)
                 throw new InvalidOperationException("Already disposed, cannot make requests");
 
@@ -91,7 +90,7 @@ namespace OrcVillage.Messaging.Impl
                 requestProperties.ContentType = serializer.ContentType;
                 requestProperties.Type = command.GetType().Name;
                 requestProperties.Persistent = true; //just helper for setting .DeliveryMode
-                    
+
 
                 requestProperties.Headers = new Dictionary<string, object>();
                 requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;

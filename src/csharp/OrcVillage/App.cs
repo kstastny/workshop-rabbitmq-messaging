@@ -116,9 +116,15 @@ namespace OrcVillage
         {
             using (var scope = scopeFactory.CreateScope())
             {
-                var messagePublisher = scope.ServiceProvider.GetService<IMessagePublisher>();
+                using (var ctx = scope.ServiceProvider.GetService<VillageDbContext>())
+                {
+                    var messagePublisher = scope.ServiceProvider.GetService<IMessagePublisher>();
 
-                messagePublisher.PublishCommand(commandBase);
+                    messagePublisher.PublishCommand(commandBase);
+
+
+                    ctx.SaveChanges();
+                }
             }
         }
 
@@ -216,6 +222,7 @@ namespace OrcVillage
                         }
                     }
                 });
+
             commandConsumer.Start(
                 new ConsumerConfiguration
                 {

@@ -4,6 +4,13 @@ storage: none
 
 nuget System.Linq
 
+// Configuration
+nuget Microsoft.Extensions.Configuration
+nuget Microsoft.Extensions.Configuration.Json
+nuget Microsoft.Extensions.Configuration.Binder
+nuget Microsoft.Extensions.Configuration.EnvironmentVariables
+nuget Microsoft.Extensions.Configuration.FileExtensions
+
 nuget Microsoft.Extensions.Logging
 nuget Microsoft.Extensions.Logging.Console
 nuget Microsoft.Extensions.DependencyInjection

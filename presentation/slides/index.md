@@ -249,6 +249,8 @@ TODO talk about retry with delay, deduplication
 - will be sent by presenter
 
 TODO prepare examples CSharp - DeadLetterLog - handle message from DLX and store in DB. inspect headers
+    TODO prepare DLX queue and bind it to exchange - we can inspect messages there
+    TODO DLX settings - 10-30 seconds will suffice
 TODO prepare examples FSharp
 TODO prepare templates CSharp
 TODO prepare templates FSharp

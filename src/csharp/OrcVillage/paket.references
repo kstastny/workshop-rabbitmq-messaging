@@ -1,5 +1,11 @@
 System.Linq
 
+Microsoft.Extensions.Configuration
+Microsoft.Extensions.Configuration.Json
+Microsoft.Extensions.Configuration.Binder
+Microsoft.Extensions.Configuration.EnvironmentVariables
+Microsoft.Extensions.Configuration.FileExtensions
+
 Microsoft.Extensions.Logging
 Microsoft.Extensions.Logging.Console
 Microsoft.Extensions.DependencyInjection

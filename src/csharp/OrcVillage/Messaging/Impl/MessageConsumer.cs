@@ -23,11 +23,10 @@ namespace OrcVillage.Messaging.Impl
         private readonly ConnectionProvider connectionProvider;
 
         private IModel channel;
-        private string connectionName;
 
         private State state = State.Created;
 
-        private object connLock = new object();
+        private readonly object connLock = new object();
 
         /// <summary>
         /// 0: no specific limit
@@ -62,7 +61,6 @@ namespace OrcVillage.Messaging.Impl
                     return;
 
                 var connection = connectionProvider.GetOrCreateConnection();
-                connectionName = connection.ClientProvidedName;
 
                 channel = connection.CreateModel();
                 channel.CallbackException += ChannelOnCallbackException;
@@ -142,7 +140,7 @@ namespace OrcVillage.Messaging.Impl
 //                        ea.Exchange, ea.RoutingKey);
 
                     Console.WriteLine("Error handling message: " + e.Message);
-                    //TODO Retry - limited number of times
+                    //TODO exercise: Retry - limited number of times
                     channel.BasicReject(ea.DeliveryTag, false);
                 }
                 catch (Exception e)

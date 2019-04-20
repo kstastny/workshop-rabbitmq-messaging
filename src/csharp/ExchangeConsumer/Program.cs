@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ExchangeConsumer.Events;
 using ExchangeConsumer.Messaging;
-using ExchangeConsumer.Messaging.Impl;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -13,11 +13,9 @@ namespace ExchangeConsumer
         static void Main(string[] args)
         {
             var serviceProvider = SetupServices();
-            //TODO declare exchanges and shared queues. including one shared DLX
 
-            //TODO separate consumer for Commands! and for DLX!
-            serviceProvider.GetService<MessageConsumer<OrcEvent>>().Start(
-                new MessageConsumerConfiguration
+            serviceProvider.GetService<MessageSpy<OrcEvent>>().Start(
+                new MessageSpyConfiguration
                 {
                     PrefetchCount = 300,
                     QueueBindings = new List<QueueBinding>
@@ -27,16 +25,16 @@ namespace ExchangeConsumer
                             Exchange = "orcvillage.events",
                             RoutingKey = "orcevent"
                         },
-//                        new QueueBinding
-//                        {
-//                            Exchange = "orcvillage.commands",
-//                            RoutingKey = "quest"
-//                        },
+                        new QueueBinding
+                        {
+                            Exchange = "orcvillage.commands",
+                            RoutingKey = "quest"
+                        },
                         new QueueBinding
                         {
                             Exchange = "orcvillage.commands",
                             RoutingKey = "preparationtask"
-                        },                        
+                        },
                         new QueueBinding
                         {
                             Exchange = "orcvillage.dlx",
@@ -51,28 +49,31 @@ namespace ExchangeConsumer
             serviceProvider.GetService<ConnectionProvider>().Dispose();
         }
 
-        private static Configuration GetConfiguration()
+        private static Configuration GetConfiguration(IConfiguration config)
         {
-            //TODO read from settings, aka Configuration.GetSection("RabbitRpc").Get<RabbitConfigConnection>();
-            return new Configuration
-            {
-                Host = "stastnyk",
-                Port = 5672,
-                VHost = "/",
-                Username = "workshop",
-                Password = "inasproboate",
-                ConnectionName = "cs-exchange-consumer @ " + Environment.MachineName
-            };
+            var connectionConfiguration =
+                config.GetSection("RabbitMq").Get<Configuration>();
+
+            if (connectionConfiguration == null)
+                throw new Exception("Missing or invalid RabbitMQ configuration");
+
+            connectionConfiguration.ConnectionName = "cs-exchange-consumer @ " + Environment.MachineName;
+
+            return connectionConfiguration;
         }
 
         private static IServiceProvider SetupServices()
         {
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", true)
+                .AddEnvironmentVariables()
+                .Build();
+
+
             var services = new ServiceCollection()
-                .AddSingleton(GetConfiguration())
+                .AddSingleton(GetConfiguration(config))
                 .AddSingleton<ConnectionProvider>()
-                .AddSingleton(typeof(MessageConsumer<>))
-                .AddSingleton<IMessageHandler<OrcEvent>, OrcEventHandler>()
-                .AddSingleton<ISerializer, JsonSerializer>();
+                .AddSingleton(typeof(MessageSpy<>));
 
 
             services.AddLogging(builder =>

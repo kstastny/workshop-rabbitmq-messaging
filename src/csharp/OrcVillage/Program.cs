@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using OrcVillage.Database;
 using OrcVillage.Messaging.Impl;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using OrcVillage.Messaging;
 using OrcVillage.Messaging.Commands;
 using OrcVillage.Messaging.Events;
@@ -22,39 +23,45 @@ namespace OrcVillage
             serviceProvider.GetService<App>().Run();
         }
 
-        private static ConnectionConfiguration GetConfiguration()
+        private static ConnectionConfiguration GetConfiguration(IConfiguration config)
         {
-            //TODO read from settings, aka Configuration.GetSection("RabbitRpc").Get<RabbitConfigConnection>();
-            return new ConnectionConfiguration
-            {
-                Host = "stastnyk",
-                Port = 5672,
-                VHost = "/",
-                Username = "workshop",
-                Password = "inasproboate",
-                ConnectionName = "cs-orc-village @ " + Environment.MachineName
-            };
+            var connectionConfiguration =
+                config.GetSection("RabbitMq").Get<ConnectionConfiguration>();
+
+            if (connectionConfiguration == null)
+                throw new Exception("Missing or invalid RabbitMQ configuration");
+
+            connectionConfiguration.ConnectionName = "cs-orc-village @ " + Environment.MachineName;
+
+            return connectionConfiguration;
         }
 
-        private static AppConfiguration GetAppConfiguration()
+        private static AppConfiguration GetAppConfiguration(IConfiguration config)
         {
-            return new AppConfiguration
-            {
-                ConnectionString =
-                    @"Server=(LocalDB)\messaging;Initial Catalog=messaging_samples;Persist Security Info=False;Integrated security=False;User ID=messaging;Password=Vo60&8cV7erE;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;",
-                DbFailureRate = 0,
-                MessagingFailureRate = 0,
-                QuestFailureRate = 0.5,
-                PreparationFailureRate = 0.1
-            };
+            var appConfiguration =
+                config.GetSection("Application").Get<AppConfiguration>();
+
+            if (appConfiguration == null)
+                throw new Exception("Missing or invalid application configuration");
+
+
+            appConfiguration.ConnectionString = config["Database:ConnectionString"];
+
+            return appConfiguration;
         }
 
         private static IServiceProvider SetupServices()
         {
-            var appConfiguration = GetAppConfiguration();
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", true)
+                .AddEnvironmentVariables()
+                .Build();
+
+
+            var appConfiguration = GetAppConfiguration(config);
 
             var services = new ServiceCollection()
-                .AddSingleton(GetConfiguration())
+                .AddSingleton(GetConfiguration(config))
                 .AddSingleton(appConfiguration)
                 .AddSingleton<App>();
 
@@ -76,8 +83,8 @@ namespace OrcVillage
                 .AddSingleton<ConnectionProvider>()
                 .AddSingleton<IRoutingTable<CommandBase>, CommandRoutingTable>()
                 .AddSingleton<IRoutingTable<EventBase>, EventRoutingTable>()
-                .AddSingleton<IMessagePublisher, MessagePublisher>()
-//                .AddScoped<IMessagePublisher, OutboxPublisher>()
+//                .AddSingleton<IMessagePublisher, MessagePublisher>()
+                .AddScoped<IMessagePublisher, OutboxPublisher>()
                 .AddSingleton<OutboxProcessor>()
                 .AddSingleton(typeof(IMessageConsumer<>), typeof(MessageConsumer<>))
                 .AddSingleton<IMessageHandler<CommandBase>, CommandHandler>()
