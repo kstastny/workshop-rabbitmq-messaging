@@ -90,6 +90,8 @@ namespace OrcVillage.Messaging.Impl
                 var requestProperties = channel.CreateBasicProperties();
                 requestProperties.ContentType = serializer.ContentType;
                 requestProperties.Type = command.GetType().Name;
+                requestProperties.Persistent = true; //just helper for setting .DeliveryMode
+                    
 
                 requestProperties.Headers = new Dictionary<string, object>();
                 requestProperties.Headers[MessagingConstants.HEADER_SENDER] = connectionName;

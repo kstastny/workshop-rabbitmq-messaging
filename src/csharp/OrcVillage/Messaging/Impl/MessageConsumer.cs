@@ -92,8 +92,9 @@ namespace OrcVillage.Messaging.Impl
 
                 foreach (var binding in consumerConfiguration.QueueBindings)
                 {
-                    channel.QueueBind(binding.QueueName ?? exclusiveQueueName, binding.Exchange, binding.RoutingKey);
-                    channel.BasicConsume(consumer, exclusiveQueueName, autoAck: false);
+                    var queueName = binding.QueueName ?? exclusiveQueueName;
+                    channel.QueueBind(queueName, binding.Exchange, binding.RoutingKey);
+                    channel.BasicConsume(consumer, queueName, autoAck: false);
                 }
 
 
@@ -134,13 +135,22 @@ namespace OrcVillage.Messaging.Impl
 
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 }
+                catch (TransientFailure e)
+                {
+//                    logger.LogError(
+//                        e, "Error handling message from exchange {0} with routing key {1}.",
+//                        ea.Exchange, ea.RoutingKey);
+
+                    Console.WriteLine("Error handling message: " + e.Message);
+                    //TODO Retry - limited number of times
+                    channel.BasicReject(ea.DeliveryTag, false);
+                }
                 catch (Exception e)
                 {
                     logger.LogError(
-                        e, "Error sending message response from exchange {0} with routing key {1} to reply channel ",
-                        ea.Exchange, ea.RoutingKey, ea.BasicProperties.ReplyTo);
+                        e, "Error handling message from exchange {0} with routing key {1}.",
+                        ea.Exchange, ea.RoutingKey);
 
-                    //TODO Retry sending the message in case of failure
                     channel.BasicReject(ea.DeliveryTag, false);
                 }
             }

@@ -3,11 +3,11 @@ using OrcVillage.Messaging.Events;
 
 namespace OrcVillage.Messaging.Impl
 {
-    public class OrcEventHandler : IMessageHandler<EventBase>
+    public class EventHandler : IMessageHandler<EventBase>
     {
         public void Handle(EventBase message)
         {
-            Console.WriteLine("Event received " + message.GetType().FullName);
+            Console.WriteLine("Event received " + message);
         }
     }
 }

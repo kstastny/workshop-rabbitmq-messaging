@@ -7,5 +7,10 @@ namespace OrcVillage.Messaging.Commands
         public Guid QuestId { get; set; }
         
         public string QuestGoal { get; set; }
+
+        public override string ToString()
+        {
+            return $"Quest [{QuestId}]: {QuestGoal}";
+        }
     }
 }

@@ -9,6 +9,7 @@ using OrcVillage.Messaging;
 using OrcVillage.Messaging.Commands;
 using OrcVillage.Messaging.Events;
 using OrcVillage.Messaging.Outbox;
+using EventHandler = OrcVillage.Messaging.Impl.EventHandler;
 
 namespace OrcVillage
 {
@@ -56,9 +57,8 @@ namespace OrcVillage
                 .AddSingleton(GetConfiguration())
                 .AddSingleton(appConfiguration)
                 .AddSingleton<App>();
-                
-                
-                
+
+
             //serialization
             services
                 //.AddSingleton<ISerializer, JsonSerializer>()
@@ -67,7 +67,6 @@ namespace OrcVillage
                 .AddSingleton<IDomainConverter<CommandBase>, CommandDomainConverter>()
                 .AddSingleton<IDomainConverter<EventBase>, EventDomainConverter>()
                 ;
-                
 
 
             services.AddDbContext<VillageDbContext>(c => { c.UseSqlServer(appConfiguration.ConnectionString); });
@@ -82,7 +81,7 @@ namespace OrcVillage
                 .AddSingleton<OutboxProcessor>()
                 .AddSingleton(typeof(IMessageConsumer<>), typeof(MessageConsumer<>))
                 .AddSingleton<IMessageHandler<CommandBase>, CommandHandler>()
-                .AddSingleton<IMessageHandler<EventBase>, OrcEventHandler>()
+                .AddSingleton<IMessageHandler<EventBase>, EventHandler>()
                 ;
 
             services.AddLogging(builder =>

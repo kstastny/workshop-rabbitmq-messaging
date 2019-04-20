@@ -153,18 +153,11 @@ namespace OrcVillage
                     MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS);
 
 
-                channel.QueueDeclare(MessagingConstants.QUEUE_PREPARATION, false, false, false
-
-                    //TODO ???
-                    //                    ,new Dictionary<string, object>
-//                    {
-//                        {"x-dead-letter-exchange", MessagingConstants.EXCHANGE_DLX},
-//                        {"x-message-ttl", MessagingConstants.QUEST_TIMEOUT_MS}
-//                    }
-                );
-                channel.QueueBind(
-                    MessagingConstants.QUEUE_PREPARATION, MessagingConstants.EXCHANGE_COMMANDS,
-                    MessagingConstants.ROUTINGKEY_CHIEFTAIN_PREPARATION);
+                //NOTE: everyone has to prepare. only one can fulfill the quest
+//                channel.QueueDeclare(MessagingConstants.QUEUE_PREPARATION, false, false, false);
+//                channel.QueueBind(
+//                    MessagingConstants.QUEUE_PREPARATION, MessagingConstants.EXCHANGE_COMMANDS,
+//                    MessagingConstants.ROUTINGKEY_CHIEFTAIN_PREPARATION);
             }
         }
 
@@ -231,6 +224,7 @@ namespace OrcVillage
                     {
                         new QueueBinding
                         {
+                            QueueName = MessagingConstants.QUEUE_QUESTS,
                             Exchange = MessagingConstants.EXCHANGE_COMMANDS,
                             RoutingKey = MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS
                         },
