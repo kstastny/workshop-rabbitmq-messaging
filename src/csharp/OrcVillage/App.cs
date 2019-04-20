@@ -102,7 +102,7 @@ namespace OrcVillage
                             Profession = newborn.Profession
                         });
 
-                        RandomFailure("database", appConfiguration.MessagingFailureRate);
+                        RandomFailure("database", appConfiguration.DbFailureRate);
 
                         ctx.SaveChanges();
                     }

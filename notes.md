@@ -22,12 +22,14 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 
 ### Exercise 1 - Message Publishing
 
+* Task: send a message to everyone when new orc warrior is born 
 * Console.WriteLine is meant as CLI, logger is just logger
 * Solution
     * notice one connection
     * lock when sending - channel is not thread safe
     * set content type
     * set message type
+
 
 ### Failures in Publishing
 
@@ -38,11 +40,17 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
     * https://www.rabbitmq.com/confirms.html#when
 
 * when designing, THINK ABOUT: for every new feature, communication channel - what happens if the message gets lost? What if it gets delivered late? what if it is delivered more than once?
-    * and design accordingly     
+    * and design accordingly   
+
+* publisher confirms
+    * https://www.rabbitmq.com/confirms.html#when-publishes-are-confirmed
+    * for unroutable - confirmed after basic return
+    * for routable - accepted by all queues. durable messages persisted to disk (on all mirrors)
+
 
 #### Demo - Publishing Trouble
 
-* TODO where and how to show
+* show Lost Send, Premature Send, use default MessagePublisher
 
 ' `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
         - show what happens if there's nowhere to route (basic return)
@@ -54,10 +62,10 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 
 #### Exercise 2 - Outbox
 
-* publisher confirms
-    * https://www.rabbitmq.com/confirms.html#when-publishes-are-confirmed
-    * for unroutable - confirmed after basic return
-    * for routable - accepted by all queues. durable messages persisted to disk (on all mirrors)
+* Task: send a message reliably to everyone when new orc warrior is born 
+* demo - stop broker, check recovery (after restart of app :))
+
+
 * stop broker so everyone can fill their outboxes
 * start broker and see recovery
 
@@ -83,6 +91,11 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 * options. retry with delay - short discussion, or just info, do not go that far
 * https://www.rabbitmq.com/confirms.html watch out for requeue/redelivery loop. consumers should track number of redeliveries    
 * nontransient failure - do not retry, reject
+
+
+### Discussion
+
+* ask for feedback
 
 
 ## Sources

@@ -105,8 +105,6 @@ TODO setup instructions in readme.md
 
 ***
 
-TODO prepare the demo
-
 > Demo - Publishing Trouble
 
 ' `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
@@ -161,10 +159,10 @@ TODO prepare the demo
 
 > Exercise 2 - Outbox
 
-DONE implement example in Csharp
-TODO prepare template in CSharp
+* complete TODOs in the solution `exercise-2`
 
-TODO demo - stop broker, see recovery
+
+TODO prepare template in CSharp
 
 
 *** 
@@ -175,6 +173,8 @@ TODO demo - stop broker, see recovery
 ' every tribe receives commands from the supremene chieftain and acts on them
 ' preparation - every tribe does it
 ' quest - only one tribe tries to fulfill it
+
+TODO tip - change exchange names so others messages don't interfere with yours when testing
 
 DONE implement example in CSharp
         - command handler - chance of failure of quest and preparation 
@@ -212,6 +212,7 @@ TODO prepare template in FSharp
 > Exercise 4 - Retry
 
 TODO prepare exercise (retry - sends to queue with no listeners, after TTL Rabbit sends to DLX which is the queue that has listeners and will process. draw an image)
+        Retry - original message id, use new because of duplicate detection in Rabbit? Ukazku s DLX. Info o pluginu
 TODO talk about retry with delay, deduplication
 
 ***
