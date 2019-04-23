@@ -176,7 +176,6 @@ https://www.rabbitmq.com/api-guide.html#concurrency
 
 ### Message Buses
 
-software
  * https://particular.net/nservicebus
  * https://masstransit-project.com/
  * https://www.goparamore.io/
