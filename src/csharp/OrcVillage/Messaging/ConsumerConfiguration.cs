@@ -26,5 +26,7 @@ namespace OrcVillage.Messaging
         public string Exchange { get; set; }
         
         public string RoutingKey { get; set; }
+        
+        public string RetryDlx { get; set; }
     }
 }

@@ -64,6 +64,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 
 #### Exercise 2 - Outbox
 
+* show how it should work first
 * Task: send a message reliably to everyone when new orc warrior is born 
 * demo - stop broker, check recovery (after restart of app :))
 
@@ -94,6 +95,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 * options. retry with delay - short discussion, or just info, do not go that far
 * https://www.rabbitmq.com/confirms.html watch out for requeue/redelivery loop. consumers should track number of redeliveries    
 * nontransient failure - do not retry, reject
+* immediate retry - puts message at the head of the queue, will be processed again. we need some delay
 
 options, aka https://jack-vanlightly.com/blog/2017/3/24/rabbitmq-delayed-retry-approaches-that-work
     * Simple Wait Exchange and Queue Pattern - only works if the retry time is always the same (messages with longer TTL will block those with shorter!)

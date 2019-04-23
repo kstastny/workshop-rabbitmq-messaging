@@ -23,6 +23,7 @@ namespace OrcVillage.Messaging.Impl
         private readonly ConnectionProvider connectionProvider;
 
         private IModel channel;
+        private IModel retryChannel;
 
         private State state = State.Created;
 
@@ -33,6 +34,10 @@ namespace OrcVillage.Messaging.Impl
         /// other numbers: limits size of message (number of octets / bytes) during prefetch
         /// </summary>
         private const uint PREFETCH_SIZE = 0;
+
+        private IDictionary<string, string> retryExchangeByExchangeAndRoutingKey =
+            new Dictionary<string, string>();
+
 
         public MessageConsumer(
             ILogger<MessageConsumer<T>> logger,
@@ -62,6 +67,12 @@ namespace OrcVillage.Messaging.Impl
 
                 var connection = connectionProvider.GetOrCreateConnection();
 
+                // init retry channel
+                retryChannel = connection.CreateModel();
+                retryChannel.CallbackException += ChannelOnCallbackException;
+                retryChannel.ModelShutdown += ChannelOnShutdown;
+
+                // init consume channel                    
                 channel = connection.CreateModel();
                 channel.CallbackException += ChannelOnCallbackException;
                 channel.ModelShutdown += ChannelOnShutdown;
@@ -95,9 +106,18 @@ namespace OrcVillage.Messaging.Impl
                     channel.BasicConsume(consumer, queueName, autoAck: false);
                 }
 
+                retryExchangeByExchangeAndRoutingKey =
+                    consumerConfiguration.QueueBindings.ToDictionary(
+                        x => $"{x.Exchange}||{x.RoutingKey}", x => x.RetryDlx);
 
                 state = State.Running;
             }
+        }
+
+        private string GetRetryExchange(string exchange, string routingKey)
+        {
+            retryExchangeByExchangeAndRoutingKey.TryGetValue($"{exchange}||{routingKey}", out var retryExchange);
+            return retryExchange;
         }
 
         private void ProcessMessage(BasicDeliverEventArgs ea)
@@ -140,7 +160,21 @@ namespace OrcVillage.Messaging.Impl
 //                        ea.Exchange, ea.RoutingKey);
 
                     Console.WriteLine("Error handling message: " + e.Message);
-                    //TODO exercise: Retry - limited number of times
+
+                    //NOTE: ideally, retry logic would be encapsulated in different dependency. For simplicity, we keep it here
+                    var retryExchange = GetRetryExchange(ea.Exchange, ea.RoutingKey);
+                    if (!string.IsNullOrWhiteSpace(retryExchange))
+                    {
+                        //TODO we should use MessagePublisher for this
+                        //NOTE: here we would add/increase count of retries header and possibly timeout
+                        retryChannel.BasicPublish(
+                            retryExchange,
+                            ea.RoutingKey,
+                            body: ea.Body,
+                            mandatory:true, 
+                            basicProperties:ea.BasicProperties);
+                    }
+
                     channel.BasicReject(ea.DeliveryTag, false);
                 }
                 catch (Exception e)
@@ -210,6 +244,7 @@ namespace OrcVillage.Messaging.Impl
         public void Dispose()
         {
             channel?.Dispose();
+            retryChannel?.Dispose();
         }
     }
 }

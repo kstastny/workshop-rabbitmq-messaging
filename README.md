@@ -24,5 +24,6 @@
 Following parts of the workshop need completion
 
  * solution of Exercise 4 - Retry
+ * code cleaning of CSharp exercises
  * FSharp exercises
  * Exchange consumer in FSharp

@@ -40,6 +40,21 @@ namespace OrcVillage
         private readonly OrcChieftain chieftain = new OrcChieftain();
         private readonly Random rnd = new Random();
 
+
+        /// <summary>
+        /// Exchange where messages for retrying will be sent
+        /// </summary>
+        private readonly string retryExchange = "orcvillage.retry." + Environment.MachineName;
+
+        /// <summary>
+        /// Exchange for repeating commands
+        /// </summary>
+        private readonly string repeatCommandExchange = "orcvillage.repeat." + Environment.MachineName;
+
+        /// <summary>
+        /// Message will sit here until Dead-Lettered to repeat command exchange
+        /// </summary>
+        private readonly string retryQueue = "orcvillage.retry." + Environment.MachineName;
         //private readonly DbContextOptionsBuilder<VillageDbContext> optionsBuilder;
 
         public App(
@@ -135,7 +150,7 @@ namespace OrcVillage
                 using (var ctx = scope.ServiceProvider.GetService<VillageDbContext>())
                 {
                     var messagePublisher = scope.ServiceProvider.GetService<IMessagePublisher>();
-                    
+
                     //TODO DLX for preparation queue. or better example
                     messagePublisher.PublishPoisonMessage(chieftain.Preparation());
                     messagePublisher.PublishPoisonMessage(chieftain.Quest());
@@ -181,6 +196,26 @@ namespace OrcVillage
 //                channel.QueueBind(
 //                    MessagingConstants.QUEUE_PREPARATION, MessagingConstants.EXCHANGE_COMMANDS,
 //                    MessagingConstants.ROUTINGKEY_CHIEFTAIN_PREPARATION);
+
+                // retry for commands
+
+                channel.ExchangeDeclare(retryExchange, "fanout", false, false);
+                channel.QueueDeclare(retryQueue, false, false, false,
+                    new Dictionary<string, object>
+                    {
+                        // send message to repeat exchange
+                        {"x-dead-letter-exchange", repeatCommandExchange},
+                        // NOTE: retry timeout is static, no backoff or jitter.
+                        {"x-message-ttl", 5000}
+                    });
+                channel.QueueBind(retryQueue, retryExchange, "");
+
+                // repeat commands
+                channel.ExchangeDeclare(repeatCommandExchange, "direct", false, false);
+                // when we repeat commands, we have to send QUESTS to normal command exchange, they can be taken by anyone
+                // however, PREPARATIONS have to be handled by us only if we have to repeat them (exclusive queue is created by the consumer)
+                //channel.QueueBind(MessagingConstants.QUEUE_QUESTS, repeatCommandExchange,MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS);
+                channel.ExchangeBind(MessagingConstants.EXCHANGE_COMMANDS, repeatCommandExchange, MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS);
             }
         }
 
@@ -252,14 +287,23 @@ namespace OrcVillage
                     {
                         new QueueBinding
                         {
-                            QueueName = MessagingConstants.QUEUE_QUESTS,
                             Exchange = MessagingConstants.EXCHANGE_COMMANDS,
-                            RoutingKey = MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS
+                            RoutingKey = MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS,
+                            QueueName = MessagingConstants.QUEUE_QUESTS,
+                            RetryDlx = retryExchange
                         },
                         new QueueBinding
                         {
                             Exchange = MessagingConstants.EXCHANGE_COMMANDS,
-                            RoutingKey = MessagingConstants.ROUTINGKEY_CHIEFTAIN_PREPARATION
+                            RoutingKey = MessagingConstants.ROUTINGKEY_CHIEFTAIN_PREPARATION,
+                            RetryDlx = retryExchange
+                        },
+                        new QueueBinding
+                        {
+                            Exchange = repeatCommandExchange,
+                            RoutingKey = MessagingConstants.ROUTINGKEY_CHIEFTAIN_PREPARATION,
+                            //NOTE: for simplicity, we will not repeat failed preparations again
+                            //RetryDlx = retryExchange
                         }
                     }
                 });
