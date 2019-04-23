@@ -67,11 +67,6 @@
 * at the consumer side
 * separately
 
-' my opinion - declaring on both makes sure that both sides' expectations are correct
-' but - needs to correctly sync and some decisions are not meant to be done by that side
-' earlier I used to do on both sides. Now I'd say either define queues completely elsewhere, or for commands and RPC - consumer only. For events - publisher only
-' very much depends on the design of the queues
-
 ***
 
 ### Failures in Publishing
@@ -89,7 +84,7 @@
 ### Failures in Publishing
 
 * if unsure, producer should publish the message again
-* set messages and queues as durable
+* set messages persistent, exchanges and queues as durable
 * use publisher confirms
 
 ' republish - with the same MessageId! leads to duplicates

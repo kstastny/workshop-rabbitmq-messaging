@@ -24,13 +24,23 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 ### Exercise 1 - Message Publishing
 
 * Task: send a message to everyone when new orc warrior is born 
+* show around the application
 * Console.WriteLine is meant as CLI, logger is just logger
 * Solution
-    * notice one connection
+    * notice one connection, mention recovery
     * lock when sending - channel is not thread safe
     * set content type
     * set message type
+    * set sender in custom header - helps in monitoring
 * Command - mandatory; event - not mandatory
+
+
+### Declaring Exchanges and Queues
+
+* my opinion - declaring on both makes sure that both sides' expectations are correct
+* but - needs to correctly sync and some decisions are not meant to be done by that side
+* earlier I used to do on both sides. Now I'd say either define queues completely elsewhere, or for commands and RPC - consumer only. For events - publisher only
+* very much depends on the design of the queues and necessary flexibility
 
 
 ### Failures in Publishing
@@ -56,7 +66,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 
 ' `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
     - show what happens if there's nowhere to route (basic return)
-    - show what happens if there's no exchange (channel disconnect! but async!)
+    - show what happens if there's no exchange (channel disconnect! but async! but still confirms :( )
 
 ' "Lost Send" - message not sent even when transaction is commited
 ' "Premature Send" - sending message before transaction is commited
@@ -64,7 +74,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 
 #### Exercise 2 - Outbox
 
-* show how it should work first
+* show how it should work first - TODO draw and image (just draw on whiteboard)
 * Task: send a message reliably to everyone when new orc warrior is born 
 * demo - stop broker, check recovery (after restart of app :))
 
@@ -84,6 +94,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
     * ack, nack (non standard, allows multiple reject), reject. multiple - all tags up to specified number
 * consumer - QOS, prefetch count https://www.rabbitmq.com/consumer-prefetch.html (only with manual acknowledgement)        
     * Values in the 100 through 300 range usually offer optimal throughput and do not run significant risk of overwhelming consumers. 
+    * “The goal is to keep the consumers saturated with work, but to minimise the client's buffer size so that more messages stay in Rabbit's queue and are thus available for new consumers or to just be sent out to consumers as they become free.”
 * mention idempotency
     * if the message is sent again, RabbitMQ sets the `redelivered` flag. 
         * The consumer may have seen the message before (or not - it might have been lost in transit on the first try)
@@ -103,10 +114,9 @@ options, aka https://jack-vanlightly.com/blog/2017/3/24/rabbitmq-delayed-retry-a
     * multiple wait queues - shared
     * NServiceBus advanced https://jack-vanlightly.com/blog/2017/3/19/reliability-default-retries-nservicebus-with-rabbitmq-part-5
 
-TODO prepare solution (retry - sends to queue with no listeners, after TTL Rabbit sends to DLX which is the queue that has listeners and will process. draw an image)
-    Retry - original message id, use new because of duplicate detection in Rabbit? example with DLX. show existing plugin
-    TODO see notes
-TODO talk about retry with delay, deduplication
+TODO draw an image of solution
+Retry - original message id, use new because of duplicate detection in Rabbit? example with DLX. show existing plugin
+talk about retry with delay, deduplication
 
 #### Exercise 5 - ???
 
@@ -118,6 +128,7 @@ TODO talk about retry with delay, deduplication
 ### Discussion
 
 * ask for feedback
+* anything else they would be interested in?
 
 
 ## Sources
