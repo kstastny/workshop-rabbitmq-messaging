@@ -14,6 +14,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
     * show examples
     * show demo
  * for each exercise
+    * show what needs to be implemented and the environment around
     * after done - show solution and discuss various aspects
 
 * talk, demos, exercises are basics for discussion, do not be afraid to ask or point out errors. 
@@ -54,8 +55,8 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 * show Lost Send, Premature Send, use default MessagePublisher
 
 ' `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
-        - show what happens if there's nowhere to route (basic return)
-        - show what happens if there's no exchange (channel disconnect! but async!)
+    - show what happens if there's nowhere to route (basic return)
+    - show what happens if there's no exchange (channel disconnect! but async!)
 
 ' "Lost Send" - message not sent even when transaction is commited
 ' "Premature Send" - sending message before transaction is commited
@@ -74,6 +75,7 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 
 * show what will be sent
 * show IRoutingTable - in command producer is necessary, show why
+* show what happens when autoAck is true and we try to ACK
 
 #### Message Consumption
 
@@ -93,6 +95,23 @@ We will use RabbitMQ as a message broker, with examples in .NET languages.
 * https://www.rabbitmq.com/confirms.html watch out for requeue/redelivery loop. consumers should track number of redeliveries    
 * nontransient failure - do not retry, reject
 
+options, aka https://jack-vanlightly.com/blog/2017/3/24/rabbitmq-delayed-retry-approaches-that-work
+    * Simple Wait Exchange and Queue Pattern - only works if the retry time is always the same (messages with longer TTL will block those with shorter!)
+    * multiple wait queues per app
+    * multiple wait queues - shared
+    * NServiceBus advanced https://jack-vanlightly.com/blog/2017/3/19/reliability-default-retries-nservicebus-with-rabbitmq-part-5
+
+TODO prepare solution (retry - sends to queue with no listeners, after TTL Rabbit sends to DLX which is the queue that has listeners and will process. draw an image)
+    Retry - original message id, use new because of duplicate detection in Rabbit? example with DLX. show existing plugin
+    TODO see notes
+TODO talk about retry with delay, deduplication
+
+#### Exercise 5 - ???
+
+* if time, we can do/start one of the following
+    * WireTap
+    * RPC + Smart Proxy
+    * Message History
 
 ### Discussion
 

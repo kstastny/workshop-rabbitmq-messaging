@@ -8,8 +8,6 @@
 
 # Advanced Messaging Patterns
 
-TODO setup instructions in readme.md
-
 ***
 ## Patterns Overview
 
@@ -39,7 +37,7 @@ TODO setup instructions in readme.md
 
 > Exercise 1 - Message Publishing
 
-* create database tables using script `000CreateTables`
+* create database tables using script `000CreateTables.sql`
 * setup connection string in `appsettings.json`
 * complete TODOs in the solution `exercise-1`
 
@@ -52,7 +50,7 @@ TODO setup instructions in readme.md
 ### Publishing Messages
 
 * routing information - exchange, routing key
-* Always set ContentType
+* always set ContentType
 * message Type
 * `mandatory` messages
 * `persistent` messages
@@ -107,10 +105,6 @@ TODO setup instructions in readme.md
 
 > Demo - Publishing Trouble
 
-' `mandatory` attribute + basic.return https://www.rabbitmq.com/amqp-0-9-1-quickref.html
-        - show what happens if there's nowhere to route (basic return)
-        - show what happens if there's no exchange (channel disconnect! but async!)
-
 ' "Lost Send" - message not sent even when transaction is commited
 ' "Premature Send" - sending message before transaction is commited
 ' broker stops transaction - if unavailable, this is a reason for rollback 
@@ -161,22 +155,20 @@ TODO setup instructions in readme.md
 
 * complete TODOs in the solution `exercise-2`
 
-
-TODO prepare template in CSharp
-
-
 *** 
 
 
 > Exercise 3 - Message Consumption
 
+* complete TODOs in the solution `exercise-3`
+* tip - add separate exchange and queue for handling commands so others messages don't interfere with yours when testing
+
 ' every tribe receives commands from the supremene chieftain and acts on them
 ' preparation - every tribe does it
 ' quest - only one tribe tries to fulfill it
 
-TODO tip - change exchange names so others messages don't interfere with yours when testing
 
-TODO prepare template in CSharp
+
 
 ***
 
@@ -190,8 +182,6 @@ TODO prepare template in CSharp
 ' manual vs automatic, when to use what 
 ' automatic - client receives everything, might be overloaded if there are many messages, messages may be lost
 ' see https://www.rabbitmq.com/consumers.html and https://www.rabbitmq.com/confirms.html
-
-//TODO show what happens when autoAck is true and we try to ACK
 
 ***
 
@@ -208,10 +198,6 @@ TODO prepare template in CSharp
 > Exercise 4 - Retry
 
 ' directly continues with solved Exercise 3
-
-TODO prepare exercise (retry - sends to queue with no listeners, after TTL Rabbit sends to DLX which is the queue that has listeners and will process. draw an image)
-        Retry - original message id, use new because of duplicate detection in Rabbit? Ukazku s DLX. Info o pluginu
-TODO talk about retry with delay, deduplication
 
 ***
 ### Dead-Letter Queue
@@ -233,23 +219,6 @@ TODO talk about retry with delay, deduplication
 ' in practice poison and dead messages may end up in the same queue, you decide :)    
 
 ***
-
-> Exercise 5 - Dead Letter Exchange ?
-
-' maybe skip? means just settings DLX
-TODO or explore dead letter exchange and what changes and whatnot.
- talk about this and think of something
-- will be sent by presenter
-
-TODO prepare examples CSharp - DeadLetterLog - handle message from DLX and store in DB. inspect headers
-    TODO prepare DLX queue and bind it to exchange - we can inspect messages there
-    TODO DLX settings - 10-30 seconds will suffice
-TODO prepare examples FSharp
-TODO prepare templates CSharp
-TODO prepare templates FSharp
-
-***
-
 
 ## Monitoring
 
@@ -295,7 +264,7 @@ TODO prepare templates FSharp
 
 ***
 
-> Exercise 6 - ???
+> Exercise 5 - ???
 
 ' peoples choice, depending on time
 

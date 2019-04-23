@@ -1,0 +1,36 @@
+source https://api.nuget.org/v3/index.json
+framework: netcoreapp2.2
+storage: none
+
+nuget System.Linq
+
+// Configuration
+nuget Microsoft.Extensions.Configuration
+nuget Microsoft.Extensions.Configuration.Json
+nuget Microsoft.Extensions.Configuration.Binder
+nuget Microsoft.Extensions.Configuration.EnvironmentVariables
+nuget Microsoft.Extensions.Configuration.FileExtensions
+
+nuget Microsoft.Extensions.Logging
+nuget Microsoft.Extensions.Logging.Console
+nuget Microsoft.Extensions.DependencyInjection
+
+nuget Newtonsoft.Json
+
+nuget Microsoft.EntityFrameworkCore
+nuget Microsoft.EntityFrameworkCore.SqlServer
+
+// Messaging
+nuget RabbitMQ.Client
+
+
+group Build
+    source https://api.nuget.org/v3/index.json
+    framework: netstandard2.0
+    storage: none
+
+    nuget FSharp.Core 4.3.4 // https://github.com/fsharp/FAKE/issues/2001
+    nuget FSharp.Compiler.Tools
+    nuget Fake.Core.Target
+    nuget Fake.DotNet.Cli
+    nuget Fake.IO.FileSystem  
