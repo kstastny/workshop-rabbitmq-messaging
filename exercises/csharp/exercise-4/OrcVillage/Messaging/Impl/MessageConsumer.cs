@@ -136,7 +136,8 @@ namespace OrcVillage.Messaging.Impl
                 catch (TransientFailure e)
                 {
                     Console.WriteLine("Error handling message: " + e.Message);
-                    //TODO exercise 4: Retry - limited number of times
+                    //exercise 4: Retry - limited number of times
+                    //TODO publish message to retry exchange (on separate channel)
                     channel.BasicReject(ea.DeliveryTag, false);
                 }
                 catch (Exception e)

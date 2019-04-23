@@ -152,6 +152,8 @@ namespace OrcVillage
                 channel.QueueBind(
                     MessagingConstants.QUEUE_QUESTS, MessagingConstants.EXCHANGE_COMMANDS,
                     MessagingConstants.ROUTINGKEY_CHIEFTAIN_QUESTS);
+                
+                //TODO declare retry exchange, repeat exchange and bind everything to correct queues
             }
         }
 
