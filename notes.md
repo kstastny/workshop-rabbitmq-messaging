@@ -133,3 +133,54 @@ talk about retry with delay, deduplication
 
 ## Sources
 
+### RabbitMQ
+
+* https://www.rabbitmq.com/queues.html
+    - queue properties - name, durable, exclusive, autodelete, arguments (TTL, limits, mirroring, max priorities, consumer priorities, ...)
+* https://www.rabbitmq.com/firehose.html + tracing plugin (UI).
+* https://www.rabbitmq.com/ae.html - alternate exchange
+* https://www.rabbitmq.com/consumer-priority.html high priority consumers first. not sure why
+* https://www.rabbitmq.com/production-checklist.html
+* https://www.rabbitmq.com/priority.html priority queues
+* https://www.rabbitmq.com/parameters.html#policies 
+* https://asafdav2.github.io/2017/rabbit-mq-persistentcy-vs-durability/         
+
+https://www.cloudamqp.com/blog/2017-12-29-part1-rabbitmq-best-practice.html
+  how to set correct prefetch - different than 100-300, depends on 
+    * number of consumers and processing time
+    * few consumers with quick processing - high prefetch
+    * many consumers with short processing - lower prefetch than above
+    * many consumers and/or long processing time - prefetch 1, distribute messages evenly (not sure about this, really depends on how much concurrency is possible imo)
+
+https://www.cloudamqp.com/blog/2018-01-08-part2-rabbitmq-best-practice-for-high-performance.html
+https://www.cloudamqp.com/blog/2018-01-09-part3-rabbitmq-best-practice-for-high-availability.html
+https://www.cloudamqp.com/blog/2018-01-19-part4-rabbitmq-13-common-errors.html
+
+https://stackoverflow.com/questions/25070042/rabbitmq-consuming-and-publishing-on-same-channel 
+https://www.rabbitmq.com/api-guide.html#concurrency
+
+### Retry and Delayed Delivery
+
+* retry and delayed delivery
+    * https://jack-vanlightly.com/blog/2017/3/24/rabbitmq-delayed-retry-approaches-that-work
+            * https://jack-vanlightly.com/blog/2017/3/19/reliability-default-retries-nservicebus-with-rabbitmq-part-5 - 
+            * https://stackoverflow.com/questions/23158310/how-do-i-set-a-number-of-retry-attempts-in-rabbitmq ! approaches
+    * https://github.com/rabbitmq/rabbitmq-delayed-message-exchange
+
+    * https://gagnechris.wordpress.com/2015/09/19/easy-retries-with-rabbitmq/ - but ignores different delay times
+
+  * delayed delivery
+     * Azure Service Bus - has support, see https://amido.com/blog/azure-service-bus-how-to-delay-a-message-being-sent-to-the-queue/
+     * NServiceBus https://docs.particular.net/transports/rabbitmq/delayed-delivery
+
+
+### Message Buses
+
+software
+ * https://particular.net/nservicebus
+ * https://masstransit-project.com/
+ * https://www.goparamore.io/
+
+### Other important knowledge
+
+https://blogs.msdn.microsoft.com/seteplia/2018//the-danger-of-taskcompletionsourcet-class/  - SetResult calls continuations asynchronously by default
