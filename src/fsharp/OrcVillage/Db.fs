@@ -1,4 +1,4 @@
-module VehicleRepository.Db
+module OrcVillage.Db
 
 open System
 open System.Data.SqlClient

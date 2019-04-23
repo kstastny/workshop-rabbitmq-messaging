@@ -1,4 +1,4 @@
-namespace VehicleRepository.Messaging
+namespace OrcVillage.Messaging
 
 open System
 
@@ -8,8 +8,8 @@ open RabbitMQ.Client
 open RabbitMQ.Client.Events
 
 
-open VehicleRepository
-open VehicleRepository.Domain
+open OrcVillage
+open OrcVillage.Domain
 
 type Configuration = {
     Host: string
@@ -24,7 +24,7 @@ type IPublisher =
     inherit IDisposable
 
     //TODO return result instead
-    abstract PublishEvent: VehicleEvent -> unit
+    abstract PublishEvent: OrcEvent -> unit
 
 
 
@@ -45,7 +45,7 @@ module RabbiMq =
         factory.UserName <- config.Username
         factory.Password <- config.Password
 
-        factory.CreateConnection (sprintf "vehicle-repository @ %s" Environment.MachineName)
+        factory.CreateConnection (sprintf "fs-orc-village @ %s" Environment.MachineName)
 
 
     let private createChannel (conn: IConnection) =
@@ -55,34 +55,39 @@ module RabbiMq =
 
 
     
-    type VehicleEventDto = {
+    type OrcEventDto = {
         Type: string
-        VehicleId: Guid
+        EventType: string
+        OrcId: Guid
         Name: string
-        RegistrationPlate: string
+        Profession: string
     }
     
-    let toDto = function
-        | VehicleAddedEvent v -> {
-            Type = "Added"
-            VehicleId = v.Id
-            Name = v.Name
-            RegistrationPlate = v.RegistrationPlate
+    let fromDomain = function
+        | Born x -> {
+            Type = "event.orc"
+            EventType  = "born"
+            OrcId = x.Id
+            Name = x.Name
+            Profession = x.Profession
         }
     
     
-    let private publishEvent (channel: IModel) (addr: Address) (evnt: VehicleEvent) =
+    let private publishEvent connectionName (channel: IModel) (addr: Address) (evnt: OrcEvent) =
         let body =
             evnt
-            |> toDto
+            |> fromDomain
             |> Serialization.serialize
             |> (fun x -> printfn "Sending %A" x; x)
             |> Encoding.UTF8.GetBytes
         
 
         let requestProperties = channel.CreateBasicProperties();
-        //TODO set request properties - TTL, sender identifier etc.
+        requestProperties.Type <- "event.orc"
+        
         requestProperties.Headers <- Dictionary<string, obj>()
+        requestProperties.Headers.["x-sender"] <- connectionName
+        
 
 
         channel.BasicPublish(
@@ -95,29 +100,28 @@ module RabbiMq =
 
     let createPublisher conn () =
 
-        //TODO queue and exchange declarations should be moved elsewhere
-        let vehiclesExchange = "vehicle-repository.events"
-        let vehiclesQueue = "vehicle-repository.events.queue" //TODO remove, part of CONSUMER!
-        let routingKey = "vehicle-event"
+        //TODO declare exchanges and queues
+        let eventExchange = "orcvillage.events"
+        let routingKey = "orcevent"
 
         let channel = createChannel conn
-        channel.ExchangeDeclare (
-                vehiclesExchange,
-                "direct",
-                //NOTE: normally the exchange would be durable
-                durable = false,
-                autoDelete = false);
+//        channel.ExchangeDeclare (
+//                eventExchange,
+//                "direct",
+//                //NOTE: normally the exchange would be durable
+//                durable = false,
+//                autoDelete = false);
 
 
-        channel.QueueDeclare(vehiclesQueue, false, false, false, null) |> ignore
-        channel.QueueBind(vehiclesQueue, vehiclesExchange, routingKey)
+//        channel.QueueDeclare(vehiclesQueue, false, false, false, null) |> ignore
+//        channel.QueueBind(vehiclesQueue, eventExchange, routingKey)
 
-        //NOTE: could be determined dynamically, based on settings, based on sent event etc.
-        let address = { ExchangeName = vehiclesExchange; RoutingKey = routingKey }
+        //TODO: should be determined dynamically, based on settings, based on sent event etc.
+        let address = { ExchangeName = eventExchange; RoutingKey = routingKey }
 
         { new IPublisher
              with
-                member this.PublishEvent evnt = publishEvent channel address evnt
+                member this.PublishEvent evnt = publishEvent conn.ClientProvidedName channel address evnt
           interface IDisposable
             with
                 member this.Dispose() = channel.Dispose()

@@ -1,4 +1,4 @@
-module VehicleRepository.Serialization
+module OrcVillage.Serialization
 
 open System
 
@@ -36,7 +36,7 @@ type OptionConverter() =
 
 let private settings = new JsonSerializerSettings()
 settings.NullValueHandling <- NullValueHandling.Ignore
-settings.ContractResolver <- CamelCasePropertyNamesContractResolver()
+//settings.ContractResolver <- CamelCasePropertyNamesContractResolver()
 settings.Converters.Add(new OptionConverter())
 
 let serialize obj = JsonConvert.SerializeObject(obj, settings)

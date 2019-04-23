@@ -1,13 +1,14 @@
-module VehicleRepository.App
+module OrcVillage.App
 
 open System
 open System.Transactions
 
 open FSharp.Control.Rop
 
-open VehicleRepository.Db
-open VehicleRepository.Domain
-open VehicleRepository.Messaging
+open OrcVillage
+open OrcVillage.Domain
+open OrcVillage.Db
+open OrcVillage.Messaging
 
 type AppError =
     | DataError of DataError
@@ -52,12 +53,12 @@ let inDbContext (conf: Configuration) f x =
 
     
     
-let addRandomVehicle conf (publisher: IPublisher) () =
-    Generator.generateVehicle ()
+let breed conf (publisher: IPublisher) () =
+    OrcMother.giveBirth ()
     |> inDbContext conf (fun ctx vehicle ->
         
-        Vehicles.createVehicle ctx vehicle
-        <!> VehicleAddedEvent
+        Orcs.addOrc ctx vehicle
+        <!> Born
         <!> (randomFailure "messaging" random conf.MessagingFailureRate >> publisher.PublishEvent)
         <!> (fun _ -> vehicle)
         //>>= (fun _ -> DataError.DuplicateKey "whatever" |> Error)
@@ -82,7 +83,7 @@ let run (config: Configuration) =
         cmd <- readCommand ()
         try
             match cmd with
-            | "add" -> addRandomVehicle config eventPublisher () |> printfn "%A"
+            | "add" -> breed config eventPublisher () |> printfn "%A"
             | _ -> ()
         with
         | ex -> printfn "Error: %s" ex.Message

@@ -1,7 +1,7 @@
 ﻿open System
 
-open VehicleRepository
-open VehicleRepository.App
+open OrcVillage
+open OrcVillage.App
 
 [<EntryPoint>]
 let main _ =

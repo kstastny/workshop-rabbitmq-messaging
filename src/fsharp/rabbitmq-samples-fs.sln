@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VehicleRepository", "VehicleRepository\VehicleRepository.fsproj", "{145DB739-93C9-451E-98D9-A6C264E10402}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OrcVillage", "OrcVillage\OrcVillage.fsproj", "{145DB739-93C9-451E-98D9-A6C264E10402}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ExchangeConsumer", "ExchangeConsumer\ExchangeConsumer.fsproj", "{D9D11224-861E-4C43-A172-5EB05B01DF04}"
 EndProject
